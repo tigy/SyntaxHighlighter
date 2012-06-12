@@ -11,7 +11,7 @@ var SyntaxHighligher = (function () {
 		 * 所有可用的刷子。
 		 */
 		brushes: {
-			plain: function(sourceCode, position){
+			text: function (sourceCode, position) {
 				return [position, 'plain', sourceCode.length];
 			}
 		},
@@ -24,7 +24,7 @@ var SyntaxHighligher = (function () {
 		guessLanguage: function (sourceCode) {
 			// Treat it as markup if the first non whitespace character is a < and
 			// the last non-whitespace character is a >.
-			return /^\s*</.test(sourceCode) ? 'default-markup' : 'default-code';
+			return /^\s*</.test(sourceCode) ? 'xml' : 'text';
 		},
 
 		/**
@@ -42,7 +42,7 @@ var SyntaxHighligher = (function () {
 		 * @return {Function} 返回一个刷子，用于高亮指定的源码。
 		 */
 		findBrush: function (language) {
-			return SH.brushes[language] || SH.loadBrush(language) || SH.brushes.plain;
+			return SH.brushes[language] || SH.loadBrush(language) || SH.brushes.text;
 		},
 
 		/**
@@ -73,11 +73,13 @@ var SyntaxHighligher = (function () {
 					c;
 				for (i = 0; i < stylePatternsEnd; i++) {
 					stylePattern = stylePatterns[i];
-					if (shortcutChars = stylePattern[2]) {
+					if ((shortcutChars = stylePattern[2])) {
 						for (c = shortcutChars.length; --c >= 0;) {
 							shortcuts[shortcutChars.charAt(c)] = stylePattern;
 						}
-						stylePatternsStart++;
+
+						if(i == stylePatternsStart)
+							stylePatternsStart++;
 					}
 					allRegexs.push(stylePattern[1]);
 				}
@@ -102,7 +104,7 @@ var SyntaxHighligher = (function () {
 					match,
 					isEmbedded,
 					stylePattern;
-
+				
 				while (ti < nTokens) {
 					token = tokens[ti++];
 					style = styleCache[token];
@@ -163,6 +165,7 @@ var SyntaxHighligher = (function () {
 					pos += token.length;
 				}
 
+
 				removeEmptyAndNestedDecorations(decorations);
 				return decorations;
 			};
@@ -199,7 +202,7 @@ var SyntaxHighligher = (function () {
 			} else {
 				language = (elem.className.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
 			}
-
+			
 			if (lineNumbers == undefined) {
 				lineNumbers = /\bsh-line?\b/i.test(elem.className);
 			}
@@ -215,7 +218,7 @@ var SyntaxHighligher = (function () {
 				language = SH.guessLanguage(sourceAndSpans.sourceCode);
 				elem.className += ' sh-' + language;
 			}
-
+			
 			// Apply the appropriate language handler
 			var decorations = SH.findBrush(language)(sourceAndSpans.sourceCode, 0);
 
@@ -785,17 +788,17 @@ var SyntaxHighligher = (function () {
 	 * token style for a type
 	 * @const
 	 */
-	var PR_TYPE = 'typ';
+	var PR_TYPE = 'type';
 	/**
 	 * token style for a literal value.  e.g. 1, null, true.
 	 * @const
 	 */
-	var PR_LITERAL = 'lit';
+	var PR_LITERAL = 'literal';
 	/**
 	 * token style for a punctuation string.
 	 * @const
 	 */
-	var PR_PUNCTUATION = 'pun';
+	var PR_PUNCTUATION = 'punctuation';
 	/**
 	 * token style for a punctuation string.
 	 * @const
@@ -821,15 +824,16 @@ var SyntaxHighligher = (function () {
 	 * token style for an sgml attribute name.
 	 * @const
 	 */
-	var PR_ATTRIB_NAME = 'atn';
+	var PR_ATTRIB_NAME = 'attrname';
 	/**
 	 * token style for an sgml attribute value.
 	 * @const
 	 */
-	var PR_ATTRIB_VALUE = 'atv';
+	var PR_ATTRIB_VALUE = 'attrvalue';
 
 	var register = SH.register = function (lang, brush) {
 		lang = lang.split(' ');
+		brush = SH.createBrush(brush);
 		for (var i = 0; i < lang.length; i++) {
 			SH.brushes[lang[i]] = brush;
 		}
@@ -850,47 +854,49 @@ var SyntaxHighligher = (function () {
 	 * @return {function (Object)} a function that examines the source code
 	 *     in the input job and builds the decoration list.
 	 */
-	var createSimpleBrush = SH.createSimpleBrush = function (options) {
+	var createSimpleBrush = function (options) {
 
-		var stylePatterns = [];
-
+		var shortcutStylePatterns = [], fallthroughStylePatterns = [];
 		if (options.tripleQuotedStrings) {
 			// '''multi-line-string''', 'single-line-string', and double-quoted
-			stylePatterns.push(['string', /^(?:\'\'\'(?:[^\'\\]|\\[\s\S]|\'{1,2}(?=[^\']))*(?:\'\'\'|$)|\"\"\"(?:[^\"\\]|\\[\s\S]|\"{1,2}(?=[^\"]))*(?:\"\"\"|$)|\'(?:[^\\\']|\\[\s\S])*(?:\'|$)|\"(?:[^\\\"]|\\[\s\S])*(?:\"|$))/, '\'"']);
+			shortcutStylePatterns.push(['string', /^(?:\'\'\'(?:[^\'\\]|\\[\s\S]|\'{1,2}(?=[^\']))*(?:\'\'\'|$)|\"\"\"(?:[^\"\\]|\\[\s\S]|\"{1,2}(?=[^\"]))*(?:\"\"\"|$)|\'(?:[^\\\']|\\[\s\S])*(?:\'|$)|\"(?:[^\\\"]|\\[\s\S])*(?:\"|$))/, '\'"']);
 		} else if (options.multiLineStrings) {
 			// 'multi-line-string', "multi-line-string"
-			stylePatterns.push(['string', /^(?:\'(?:[^\\\']|\\[\s\S])*(?:\'|$)|\"(?:[^\\\"]|\\[\s\S])*(?:\"|$)|\`(?:[^\\\`]|\\[\s\S])*(?:\`|$))/, '\'"`']);
+			shortcutStylePatterns.push(['string', /^(?:\'(?:[^\\\']|\\[\s\S])*(?:\'|$)|\"(?:[^\\\"]|\\[\s\S])*(?:\"|$)|\`(?:[^\\\`]|\\[\s\S])*(?:\`|$))/, '\'"`']);
 		} else {
 			// 'single-line-string', "single-line-string"
-			stylePatterns.push(['string', /^(?:\'(?:[^\\\'\r\n]|\\.)*(?:\'|$)|\"(?:[^\\\"\r\n]|\\.)*(?:\"|$))/, '"\'']);
+			shortcutStylePatterns.push(['string',
+           /^(?:\'(?:[^\\\'\r\n]|\\.)*(?:\'|$)|\"(?:[^\\\"\r\n]|\\.)*(?:\"|$))/, '"\'']);
 		}
-
+		if (options.verbatimStrings) {
+			// verbatim-string-literal production from the C# grammar.  See issue 93.
+			fallthroughStylePatterns.push(
+          ['string', /^@\"(?:[^\"]|\"\")*(?:\"|$)/, null]);
+		}
 		var hc = options.hashComments;
 		if (hc) {
 			if (options.cStyleComments) {
-				if (hc > 1) { // multiline hash comments
-					stylePatterns.push(['comment', /^#(?:##(?:[^#]|#(?!##))*(?:###|$)|.*)/, '#']);
+				if (hc > 1) {  // multiline hash comments
+					shortcutStylePatterns.push(
+              ['comment', /^#(?:##(?:[^#]|#(?!##))*(?:###|$)|.*)/, '#']);
 				} else {
 					// Stop C preprocessor declarations at an unclosed open comment
-					stylePatterns.push(
-					['comment', /^#(?:(?:define|elif|else|endif|error|ifdef|include|ifndef|line|pragma|undef|warning)\b|[^\r\n]*)/, '#']);
+					shortcutStylePatterns.push(
+              ['comment', /^#(?:(?:define|elif|else|endif|error|ifdef|include|ifndef|line|pragma|undef|warning)\b|[^\r\n]*)/, '#']);
 				}
-				stylePatterns.push(['string', /^<(?:(?:(?:\.\.\/)*|\/?)(?:[\w-]+(?:\/[\w-]+)+)?[\w-]+\.h|[a-z]\w*)>/]);
+				fallthroughStylePatterns.push(
+            ['string',
+             /^<(?:(?:(?:\.\.\/)*|\/?)(?:[\w-]+(?:\/[\w-]+)+)?[\w-]+\.h|[a-z]\w*)>/]);
 			} else {
-				stylePatterns.push(['comment', /^#[^\r\n]*/, '#']);
+				shortcutStylePatterns.push(['comment', /^#[^\r\n]*/, '#']);
 			}
 		}
-		stylePatterns.push(['plain', /^\s+/, ' \r\n\t\xA0']);
-		if (options.verbatimStrings) {
-			// verbatim-string-literal production from the C# grammar.  See issue 93.
-			stylePatterns.push(['string', /^@\"(?:[^\"]|\"\")*(?:\"|$)/]);
-		}
 		if (options.cStyleComments) {
-			stylePatterns.push(['comment', /^\/\/[^\r\n]*/]);
-			stylePatterns.push(['comment', /^\/\*[\s\S]*?(?:\*\/|$)/]);
+			fallthroughStylePatterns.push(['comment', /^\/\/[^\r\n]*/]);
+			fallthroughStylePatterns.push(['comment', /^\/\*[\s\S]*?(?:\*\/|$)/]);
 		}
 		if (options.regexLiterals) {
-			stylePatterns.push([SH.brushes.regex, new RegExp('^' + REGEXP_PRECEDER_PATTERN + '(' + // A regular expression literal starts with a slash that is
+			fallthroughStylePatterns.push([SH.brushes.regex, new RegExp('^' + REGEXP_PRECEDER_PATTERN + '(' + // A regular expression literal starts with a slash that is
 			// not followed by * or / so that it is not confused with
 			// comments.
 			'/(?=[^/*])'
@@ -908,35 +914,46 @@ var SyntaxHighligher = (function () {
 			'/' + ')')]);
 		}
 
-		var types = options['types'];
+		var types = options.types;
 		if (types) {
-			stylePatterns.push([PR_TYPE, types]);
+			fallthroughStylePatterns.push(['type', types]);
 		}
 
 		var keywords = ("" + options.keywords).replace(/^ | $/g, '');
 		if (keywords.length) {
-			stylePatterns.push(['keyword', new RegExp('^(?:' + keywords.replace(/[\s,]+/g, '|') + ')\\b')]);
+			fallthroughStylePatterns.push(
+          ['keyword',
+           new RegExp('^(?:' + keywords.replace(/[\s,]+/g, '|') + ')\\b'),
+           null]);
 		}
 
-		// TODO(mikesamuel): recognize non-latin letters and numerals in idents
+		shortcutStylePatterns.push(['plain', /^\s+/, ' \r\n\t\xA0']);
+		fallthroughStylePatterns.push(
+        // TODO(mikesamuel): recognize non-latin letters and numerals in idents
+        ['literal', /^@[a-z_$][a-z_$@0-9]*/i],
+        ['type', /^(?:[@_]?[A-Z]+[a-z][A-Za-z_$@0-9]*|\w+_t\b)/],
+        ['plain', /^[a-z_$][a-z_$@0-9]*/i],
+        ['literal',
+         new RegExp(
+             '^(?:'
+             // A hex number
+             + '0x[a-f0-9]+'
+             // or an octal or decimal number,
+             + '|(?:\\d(?:_\\d+)*\\d*(?:\\.\\d*)?|\\.\\d\\+)'
+             // possibly in scientific notation
+             + '(?:e[+\\-]?\\d+)?'
+             + ')'
+             // with an optional modifier like UL for unsigned long
+             + '[a-z]*', 'i'), '0123456789'],
+        // Don't treat escaped quotes in bash as starting strings.  See issue 144.
+        ['plain', /^\\[\s\S]?/],
+        ['punctuation', /^.[^\s\w\.$@\'\"\`\/\#\\]*/]);
 
-		stylePatterns.push(['literal', /^@[a-z_$][a-z_$@0-9]*/i], ['type', /^(?:[@_]?[A-Z]+[a-z][A-Za-z_$@0-9]*|\w+_t\b)/], ['plain', /^[a-z_$][a-z_$@0-9]*/i], ['literal', new RegExp('^(?:'
-			// A hex number
-			+
-			'0x[a-f0-9]+'
-			// or an octal or decimal number,
-			+
-			'|(?:\\d(?:_\\d+)*\\d*(?:\\.\\d*)?|\\.\\d\\+)'
-			// possibly in scientific notation
-			+
-			'(?:e[+\\-]?\\d+)?' + ')'
-			// with an optional modifier like UL for unsigned long
-			+
-			'[a-z]*', 'i'), '0123456789'],
-			// Don't treat escaped quotes in bash as starting strings.  See issue 144.
-			['plain', /^\\[\s\S]?/], ['punctuation', /^.[^\s\w\.$@\'\"\`\/\#\\]*/]);
+		return shortcutStylePatterns.concat(fallthroughStylePatterns);
 
-		return stylePatterns;
+
+
+
 
 	}
 
@@ -978,60 +995,60 @@ var SyntaxHighligher = (function () {
 		['lang-css', /^style\s*=\s*\"([^\"]+)\"/i],
 		['lang-css', /^style\s*=\s*\'([^\']+)\'/i],
 		['lang-css', /^style\s*=\s*([^\"\'>\s]+)/i]
-	]));
-	registerLangHandler(
-	createSimpleLexer([], [
-		[PR_ATTRIB_VALUE, /^[\s\S]+/]
-	]), ['uq.val']);
-	registerLangHandler(sourceDecorator({
+	]);
+	register('uq.val', [[PR_ATTRIB_VALUE, /^[\s\S]+/]]);
+
+	register('c cc cpp cxx cyc m', createSimpleBrush({
 		'keywords': CPP_KEYWORDS,
 		'hashComments': true,
 		'cStyleComments': true,
 		'types': C_TYPES
-	}), ['c', 'cc', 'cpp', 'cxx', 'cyc', 'm']);
-	registerLangHandler(sourceDecorator({
+	}));
+
+	register('json', createSimpleBrush({
 		'keywords': 'null,true,false'
-	}), ['json']);
-	registerLangHandler(sourceDecorator({
+	}));
+
+	register('cs', createSimpleBrush({
 		'keywords': CSHARP_KEYWORDS,
 		'hashComments': true,
 		'cStyleComments': true,
 		'verbatimStrings': true,
 		'types': C_TYPES
-	}), ['cs']);
-	registerLangHandler(sourceDecorator({
+	}));
+	register('java', createSimpleBrush({
 		'keywords': JAVA_KEYWORDS,
 		'cStyleComments': true
-	}), ['java']);
-	registerLangHandler(sourceDecorator({
+	}));
+	register('bsh csh sh', createSimpleBrush({
 		'keywords': SH_KEYWORDS,
 		'hashComments': true,
 		'multiLineStrings': true
-	}), ['bsh', 'csh', 'sh']);
-	registerLangHandler(sourceDecorator({
+	}));
+	register('cv py', createSimpleBrush({
 		'keywords': PYTHON_KEYWORDS,
 		'hashComments': true,
 		'multiLineStrings': true,
 		'tripleQuotedStrings': true
-	}), ['cv', 'py']);
-	registerLangHandler(sourceDecorator({
+	}));
+	register('perl pl pm', createSimpleBrush({
 		'keywords': PERL_KEYWORDS,
 		'hashComments': true,
 		'multiLineStrings': true,
 		'regexLiterals': true
-	}), ['perl', 'pl', 'pm']);
-	registerLangHandler(sourceDecorator({
+	}));
+	register('rb', createSimpleBrush({
 		'keywords': RUBY_KEYWORDS,
 		'hashComments': true,
 		'multiLineStrings': true,
 		'regexLiterals': true
-	}), ['rb']);
-	registerLangHandler(sourceDecorator({
+	}));
+	register('js', createSimpleBrush({
 		'keywords': JSCRIPT_KEYWORDS,
 		'cStyleComments': true,
 		'regexLiterals': true
-	}), ['js']);
-	registerLangHandler(sourceDecorator({
+	}));
+	register('coffee', createSimpleBrush({
 		'keywords': COFFEE_KEYWORDS,
 		'hashComments': 3,
 		// ### style block comments
@@ -1039,9 +1056,9 @@ var SyntaxHighligher = (function () {
 		'multilineStrings': true,
 		'tripleQuotedStrings': true,
 		'regexLiterals': true
-	}), ['coffee']);
-	registerLangHandler(createSimpleLexer([], [
+	}));
+	register('regex', [
 		[PR_STRING, /^[\s\S]+/]
-	]), ['regex']);
+	]);
 
 })();
