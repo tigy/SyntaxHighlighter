@@ -24,7 +24,7 @@
  * @author mikesamuel@gmail.com
  */
 
-Prettify['registerLangHandler'](Prettify['sourceDecorator']({
+SyntaxHighligher.register('proto', SyntaxHighligher.simpleLexer({
         'keywords': (
             'bytes,default,double,enum,extend,extensions,false,'
             + 'group,import,max,message,option,'
@@ -32,4 +32,4 @@ Prettify['registerLangHandler'](Prettify['sourceDecorator']({
             + 'syntax,to,true'),
         'types': /^(bool|(double|s?fixed|[su]?int)(32|64)|float|string)\b/,
         'cStyleComments': true
-      }), ['proto']);
+      }));

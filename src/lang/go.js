@@ -42,12 +42,12 @@
  */
 
 SyntaxHighligher.register('go', [
-         // Whitespace is made up of spaces, tabs and newline characters.
-         [Prettify['PR_PLAIN'], /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
-         // Not escaped as a string.  See note on minimalism above.
-         [Prettify['PR_PLAIN'], /^(?:\"(?:[^\"\\]|\\[\s\S])*(?:\"|$)|\'(?:[^\'\\]|\\[\s\S])+(?:\'|$)|`[^`]*(?:`|$))/, '"\''],
-         // Block comments are delimited by /* and */.
-         // Single-line comments begin with // and extend to the end of a line.
-         [Prettify['PR_COMMENT'], /^(?:\/\/[^\r\n]*|\/\*[\s\S]*?\*\/)/],
-         [Prettify['PR_PLAIN'], /^(?:[^\/\"\'`]|\/(?![\/\*]))+/i]
+	// Whitespace is made up of spaces, tabs and newline characters.
+	['plain', /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
+	// Not escaped as a string.  See note on minimalism above.
+	['plain', /^(?:\"(?:[^\"\\]|\\[\s\S])*(?:\"|$)|\'(?:[^\'\\]|\\[\s\S])+(?:\'|$)|`[^`]*(?:`|$))/, '"\''],
+	// Block comments are delimited by /* and */.
+	// Single-line comments begin with // and extend to the end of a line.
+	['comment', /^(?:\/\/[^\r\n]*|\/\*[\s\S]*?\*\/)/],
+	['plain', /^(?:[^\/\"\'`]|\/(?![\/\*]))+/i]
 ]);

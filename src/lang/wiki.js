@@ -22,32 +22,22 @@
  * @author mikesamuel@gmail.com
  */
 
-Prettify['registerLangHandler'](
-    Prettify['createSimpleLexer'](
-        [
-         // Whitespace
-         [Prettify['PR_PLAIN'],       /^[\t \xA0a-gi-z0-9]+/, null,
-          '\t \xA0abcdefgijklmnopqrstuvwxyz0123456789'],
-         // Wiki formatting
-         [Prettify['PR_PUNCTUATION'], /^[=*~\^\[\]]+/, null, '=*~^[]']
-        ],
-        [
-         // Meta-info like #summary, #labels, etc.
-         ['lang-wiki.meta',  /(?:^^|\r\n?|\n)(#[a-z]+)\b/],
-         // A WikiWord
-         [Prettify['PR_LITERAL'],     /^(?:[A-Z][a-z][a-z0-9]+[A-Z][a-z][a-zA-Z0-9]+)\b/
-          ],
-         // A preformatted block in an unknown language
-         ['lang-',           /^\{\{\{([\s\S]+?)\}\}\}/],
-         // A block of source code in an unknown language
-         ['lang-',           /^`([^\r\n`]+)`/],
-         // An inline URL.
-         [Prettify['PR_STRING'],
-          /^https?:\/\/[^\/?#\s]*(?:\/[^?#\s]*)?(?:\?[^#\s]*)?(?:#\S*)?/i],
-         [Prettify['PR_PLAIN'],       /^(?:\r\n|[\s\S])[^#=*~^A-Zh\{`\[\r\n]*/]
-        ]),
-    ['wiki']);
-
-Prettify['registerLangHandler'](
-    Prettify['createSimpleLexer']([[Prettify['PR_KEYWORD'], /^#[a-z]+/i, null, '#']], []),
-    ['wiki.meta']);
+SyntaxHighligher.register('wiki', [
+	// Whitespace
+	['plain',       /^[\t \xA0a-gi-z0-9]+/,  '\t \xA0abcdefgijklmnopqrstuvwxyz0123456789'],
+	// Wiki formatting
+	['punctuation', /^[=*~\^\[\]]+/, '=*~^[]'],
+	// Meta-info like #summary, #labels, etc.
+	[SyntaxHighligher.createBrush([
+		['keyword', /^#[a-z]+/i, '#']
+	]),  /(?:^^|\r\n?|\n)(#[a-z]+)\b/],
+	// A WikiWord
+	['literal',     /^(?:[A-Z][a-z][a-z0-9]+[A-Z][a-z][a-zA-Z0-9]+)\b/],
+	// A preformatted block in an unknown language
+	['none',           /^\{\{\{([\s\S]+?)\}\}\}/],
+	// A block of source code in an unknown language
+	['none', /^`([^\r\n`]+)`/],
+	// An inline URL.
+	['string', /^https?:\/\/[^\/?#\s]*(?:\/[^?#\s]*)?(?:\?[^#\s]*)?(?:#\S*)?/i],
+	['plain',       /^(?:\r\n|[\s\S])[^#=*~^A-Zh\{`\[\r\n]*/]
+]);

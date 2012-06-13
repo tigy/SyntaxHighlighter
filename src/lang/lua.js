@@ -32,28 +32,22 @@
  * @author mikesamuel@gmail.com
  */
 
-Prettify['registerLangHandler'](
-    Prettify['createSimpleLexer'](
-        [
-         // Whitespace
-         [Prettify['PR_PLAIN'],       /^[\t\n\r \xA0]+/, null, '\t\n\r \xA0'],
-         // A double or single quoted, possibly multi-line, string.
-         [Prettify['PR_STRING'],      /^(?:\"(?:[^\"\\]|\\[\s\S])*(?:\"|$)|\'(?:[^\'\\]|\\[\s\S])*(?:\'|$))/, null, '"\'']
-        ],
-        [
-         // A comment is either a line comment that starts with two dashes, or
-         // two dashes preceding a long bracketed block.
-         [Prettify['PR_COMMENT'], /^--(?:\[(=*)\[[\s\S]*?(?:\]\1\]|$)|[^\r\n]*)/],
-         // A long bracketed block not preceded by -- is a string.
-         [Prettify['PR_STRING'],  /^\[(=*)\[[\s\S]*?(?:\]\1\]|$)/],
-         [Prettify['PR_KEYWORD'], /^(?:and|break|do|else|elseif|end|false|for|function|if|in|local|nil|not|or|repeat|return|then|true|until|while)\b/, null],
-         // A number is a hex integer literal, a decimal real literal, or in
-         // scientific notation.
-         [Prettify['PR_LITERAL'],
-          /^[+-]?(?:0x[\da-f]+|(?:(?:\.\d+|\d+(?:\.\d*)?)(?:e[+\-]?\d+)?))/i],
-         // An identifier
-         [Prettify['PR_PLAIN'], /^[a-z_]\w*/i],
-         // A run of punctuation
-         [Prettify['PR_PUNCTUATION'], /^[^\w\t\n\r \xA0][^\w\t\n\r \xA0\"\'\-\+=]*/]
-        ]),
-    ['lua']);
+SyntaxHighligher.register('lua', [
+	// Whitespace
+	['plain', /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
+	// A double or single quoted, possibly multi-line, string.
+	['string', /^(?:\"(?:[^\"\\]|\\[\s\S])*(?:\"|$)|\'(?:[^\'\\]|\\[\s\S])*(?:\'|$))/, '"\''],
+	// A comment is either a line comment that starts with two dashes, or
+	// two dashes preceding a long bracketed block.
+	['comment', /^--(?:\[(=*)\[[\s\S]*?(?:\]\1\]|$)|[^\r\n]*)/],
+	// A long bracketed block not preceded by -- is a string.
+	['string', /^\[(=*)\[[\s\S]*?(?:\]\1\]|$)/],
+	['keyword', /^(?:and|break|do|else|elseif|end|false|for|function|if|in|local|nil|not|or|repeat|return|then|true|until|while)\b/],
+	// A number is a hex integer literal, a decimal real literal, or in
+	// scientific notation.
+	['literal', /^[+-]?(?:0x[\da-f]+|(?:(?:\.\d+|\d+(?:\.\d*)?)(?:e[+\-]?\d+)?))/i],
+	// An identifier
+	['plain', /^[a-z_]\w*/i],
+	// A run of punctuation
+	['punctuation', /^[^\w\t\n\r \xA0][^\w\t\n\r \xA0\"\'\-\+=]*/]
+]);

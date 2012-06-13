@@ -1,10 +1,10 @@
 ﻿.sh ol {    float: left;    margin: 0;}.sh ol li {    list-style-type: decimal;}.sh-comment { color: #93a1a1; }
 .sh-literal { color: #195f91; }
-.sh-punctuation, .opn, .clo { color: #93a1a1; }
+.sh-punctuation, .sh-leftbracket, .sh-rightbracket { color: #93a1a1; }
 .sh-function { color: #dc322f; }
 .sh-string, .sh-attrvalue { color: #D14; }
 .sh-keyword, .sh-tagname { color: #1e347b; }
-.sh-type, .sh-attrname, .sh-declaration, .var { color: teal; }
+.sh-type, .sh-attrname, .sh-declaration, .sh-var { color: teal; }
 .sh-plain { color: #48484c; }
 
 pre.sh {

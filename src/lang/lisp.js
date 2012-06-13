@@ -64,30 +64,22 @@
  * @author mikesamuel@gmail.com
  */
 
-Prettify['registerLangHandler'](
-    Prettify['createSimpleLexer'](
-        [
-         ['opn',             /^\(+/, null, '('],
-         ['clo',             /^\)+/, null, ')'],
-         // A line comment that starts with ;
-         [Prettify['PR_COMMENT'],     /^;[^\r\n]*/, null, ';'],
-         // Whitespace
-         [Prettify['PR_PLAIN'],       /^[\t\n\r \xA0]+/, null, '\t\n\r \xA0'],
-         // A double quoted, possibly multi-line, string.
-         [Prettify['PR_STRING'],      /^\"(?:[^\"\\]|\\[\s\S])*(?:\"|$)/, null, '"']
-        ],
-        [
-         [Prettify['PR_KEYWORD'],     /^(?:block|c[ad]+r|catch|con[ds]|def(?:ine|un)|do|eq|eql|equal|equalp|eval-when|flet|format|go|if|labels|lambda|let|load-time-value|locally|macrolet|multiple-value-call|nil|progn|progv|quote|require|return-from|setq|symbol-macrolet|t|tagbody|the|throw|unwind)\b/, null],
-         [Prettify['PR_LITERAL'],
-          /^[+\-]?(?:[0#]x[0-9a-f]+|\d+\/\d+|(?:\.\d+|\d+(?:\.\d*)?)(?:[ed][+\-]?\d+)?)/i],
-         // A single quote possibly followed by a word that optionally ends with
-         // = ! or ?.
-         [Prettify['PR_LITERAL'],
-          /^\'(?:-*(?:\w|\\[\x21-\x7e])(?:[\w-]*|\\[\x21-\x7e])[=!?]?)?/],
-         // A word that optionally ends with = ! or ?.
-         [Prettify['PR_PLAIN'],
-          /^-*(?:[a-z_]|\\[\x21-\x7e])(?:[\w-]*|\\[\x21-\x7e])[=!?]?/i],
-         // A printable non-space non-special character
-         [Prettify['PR_PUNCTUATION'], /^[^\w\t\n\r \xA0()\"\\\';]+/]
-        ]),
-    ['cl', 'el', 'lisp', 'scm']);
+SyntaxHighligher.register('cl el lisp scm', [
+	['leftbracket', /^\(+/, '('],
+	['rightbracket', /^\)+/, ')'],
+	// A line comment that starts with ;
+	['comment', /^;[^\r\n]*/, ';'],
+	// Whitespace
+	['plain', /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
+	// A double quoted, possibly multi-line, string.
+	['string', /^\"(?:[^\"\\]|\\[\s\S])*(?:\"|$)/, '"'],
+	['keyword', /^(?:block|c[ad]+r|catch|con[ds]|def(?:ine|un)|do|eq|eql|equal|equalp|eval-when|flet|format|go|if|labels|lambda|let|load-time-value|locally|macrolet|multiple-value-call|nil|progn|progv|quote|require|return-from|setq|symbol-macrolet|t|tagbody|the|throw|unwind)\b/],
+	['literal', /^[+\-]?(?:[0#]x[0-9a-f]+|\d+\/\d+|(?:\.\d+|\d+(?:\.\d*)?)(?:[ed][+\-]?\d+)?)/i],
+	// A single quote possibly followed by a word that optionally ends with
+	// = ! or ?.
+	['literal', /^\'(?:-*(?:\w|\\[\x21-\x7e])(?:[\w-]*|\\[\x21-\x7e])[=!?]?)?/],
+	// A word that optionally ends with = ! or ?.
+	['plain', /^-*(?:[a-z_]|\\[\x21-\x7e])(?:[\w-]*|\\[\x21-\x7e])[=!?]?/i],
+	// A printable non-space non-special character
+	['punctuation', /^[^\w\t\n\r \xA0()\"\\\';]+/]
+]);

@@ -20,27 +20,22 @@
  * @author Martin S.
  */
 
-Prettify.registerLangHandler(
-    Prettify.createSimpleLexer(
-        [
-         // whitespace
-         [Prettify.PR_PLAIN,   /^[\t\n\r \xA0]+/, null, '\t\n\r \xA0'],
-         // all comments begin with '%'
-         [Prettify.PR_COMMENT, /^%[^\r\n]*/, null, '%']
-        ],
-        [
-         //[Prettify.PR_DECLARATION, /^\\([egx]?def|(new|renew|provide)(command|environment))\b/],
-         // any command starting with a \ and contains
-         // either only letters (a-z,A-Z), '@' (internal macros)
-         [Prettify.PR_KEYWORD, /^\\[a-zA-Z@]+/],
-         // or contains only one character
-         [Prettify.PR_KEYWORD, /^\\./],
-         // Highlight dollar for math mode and ampersam for tabular
-         [Prettify.PR_TYPE,    /^[$&]/],
-         // numeric measurement values with attached units
-         [Prettify.PR_LITERAL,
-          /[+-]?(?:\.\d+|\d+(?:\.\d*)?)(cm|em|ex|in|pc|pt|bp|mm)/i],
-         // punctuation usually occurring within commands
-         [Prettify.PR_PUNCTUATION, /^[{}()\[\]=]+/]
-        ]),
-    ['latex', 'tex']);
+SyntaxHighligher.register('latex tex', [
+	// whitespace
+	['plain', /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
+	// all comments begin with '%'
+	['comment', /^%[^\r\n]*/, '%'],
+	//[Prettify.PR_DECLARATION, /^\\([egx]?def|(new|renew|provide)(command|environment))\b/],
+	// any command starting with a \ and contains
+	// either only letters (a-z,A-Z), '@' (internal macros)
+	['keyword', /^\\[a-zA-Z@]+/],
+	// or contains only one character
+	['keyword', /^\\./],
+	// Highlight dollar for math mode and ampersam for tabular
+	['type', /^[$&]/],
+	// numeric measurement values with attached units
+	['literal',
+	/[+-]?(?:\.\d+|\d+(?:\.\d*)?)(cm|em|ex|in|pc|pt|bp|mm)/i],
+	// punctuation usually occurring within commands
+	['punctuation', /^[{}()\[\]=]+/]
+]);

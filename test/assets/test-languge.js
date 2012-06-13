@@ -133,7 +133,9 @@ function normalizedHtml(node, out, opt_sortAttrs) {
  *     for an example.
  */
 function go(goldens) {
-  startClock();
+	startClock();
+
+	SyntaxHighligher.one(document.getElementById('htmlXmp'));
   SyntaxHighligher.all(function () { stopClock(); runTests(goldens); });
 }
 
@@ -193,8 +195,8 @@ function runTests(goldens) {
 	ATV: 'attrvalue',
 	ATN: 'attrname',
 	DEC: 'declaration',
-	CLO: 'clo',
-	OPN: 'opn'
+	CLO: 'rightbracket',
+	OPN: 'leftbracket'
   };
 
   var htmlOut = [];
