@@ -1,4 +1,16 @@
-﻿
+﻿// Copyright (C) 2012 xuld
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 (function (SH) {
 
@@ -27,13 +39,13 @@
 			language = (elem.className.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
 		}
 
-		if (lineNumbers == undefined) {
-			lineNumbers = /\bsh-line\b/i.test(elem.className);
-		}
+		//if (lineNumbers == undefined) {
+		//	lineNumbers = /\bsh-line\b/i.test(elem.className);
+		//}
 
-		if (indent == undefined) {
-			indent = /\bsh-indent\b/i.test(elem.className);
-		}
+		//if (indent == undefined) {
+		//	indent = /\bsh-indent\b/i.test(elem.className);
+		//}
 
 		// Extract tags, and convert the source code to plain text.
 		var sourceAndSpans = extractSourceSpans(elem);
@@ -64,13 +76,13 @@
 		function doWork() {
 			if (elements.length) {
 				SH.one(elements.shift());
-				setTimeout(doWork, 100);
+				setTimeout(doWork, 50);
 			} else if (callback) {
 				callback();
 			}
 		}
 
-		setTimeout(doWork, 100);
+		setTimeout(doWork, 0);
 	};
 
 	/**

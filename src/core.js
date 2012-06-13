@@ -181,10 +181,23 @@
 		 */
 		findBrush: function (language) {
 			return SH.brushes[language] || SH.brushes.none;
+		},
+
+		/**
+		 * 注册一个语言的刷子。
+		 * @param {String} language 要注册的语言名。
+		 * @param {Array} stylePatterns 匹配的正则列表。见 {@link SyntaxHighligher.createBrush}
+		 * @return {Function} 返回一个刷子，用于高亮指定的源码。
+		 */
+		register: function (language, stylePatterns) {
+			language = language.split(' ');
+			stylePatterns = SH.createBrush(stylePatterns);
+			for (var i = 0; i < language.length; i++) {
+				SH.brushes[language[i]] = stylePatterns;
+			}
 		}
 
 	};
-
 
 
 	// CAVEAT: this does not properly handle the case where a regular

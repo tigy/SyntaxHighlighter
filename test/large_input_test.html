@@ -2,13 +2,48 @@
 <html>
 <head>
 <title>Tests of Prettifier w/ large data files</title>
-<script src="../src/prettify.js" type="text/javascript"
- onerror="alert('Error: failed to load ' + this.src)"></script>
-<link rel="stylesheet" type="text/css" href="../src/prettify.css" />
-<link rel="stylesheet" type="text/css" href="test_styles.css" />
+<script type="text/javascript">(function () {
+    var sourceBaseUrl = "../src/";
+    var sources = [
+      "core.js",
+      "dom.js",
+      "lang/common.js",
+      "lang/apollo.js",
+      "lang/clj.js",
+      "lang/coffee.js",
+      "lang/css.js",
+      "lang/go.js",
+      "lang/hs.js",
+      "lang/lisp.js",
+      "lang/lua.js",
+      "lang/ml.js",
+      "lang/n.js",
+      "lang/php.js",
+      "lang/proto.js",
+      "lang/scala.js",
+      "lang/sql.js",
+      "lang/tex.js",
+      "lang/vhdl.js",
+      "lang/wiki.js",
+      "lang/vb.js",
+      "lang/xq.js",
+      "lang/yaml.js",
+    ];
+    var styles = [
+      "themes/default.css"
+    ];
+    for (var i = 0; i < sources.length; ++i) {
+        document.write("<script src=\"" + sourceBaseUrl + sources[i] + "\"><\/script>");
+    }
+    for (var i = 0; i < styles.length; ++i) {
+        document.write("<link rel=\"stylesheet\" href=\"" + sourceBaseUrl + styles[i] + "\">");
+    }
+})();
+</script>
+
 </head>
 
-<body bgcolor="white">
+<body>
 <div id="timing"></div>
 <div id="errorReport" style="white-space: pre"></div>
 
@@ -69,7 +104,7 @@ if (typeof console === 'undefined') {
         return function () {
           console.log('starting ' + lang + ' ' + n);
           var t0 = Date.now();
-          var result = prettyPrintOne(toPrettify, lang);
+          var result = SyntaxHighligher.one(toPrettify, lang);
           var t1 = Date.now();
           console.log('finishing ' + lang + ' ' + n);
           if (result === toPrettify) {
