@@ -3,9 +3,45 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>J+ Library</title>
-		<link href="../src/syntaxhighlighter.css" rel="stylesheet" type="text/css">
-		<script src="../src/syntaxhighlighter.js" type="text/javascript"></script>
-		<script src="../src/lang/coffee.js" type="text/javascript"></script>
+<script type="text/javascript">(function () {
+    var sourceBaseUrl = "../src/";
+    var sources = [
+      "core.js",
+      "dom.js",
+      "lang/common.js",
+      "lang/apollo.js",
+      "lang/clj.js",
+      "lang/coffee.js",
+      "lang/css.js",
+      "lang/go.js",
+      "lang/hs.js",
+      "lang/lisp.js",
+      "lang/lua.js",
+      "lang/ml.js",
+      "lang/n.js",
+      "lang/php.js",
+      "lang/proto.js",
+      "lang/scala.js",
+      "lang/sql.js",
+      "lang/tex.js",
+      "lang/vhdl.js",
+      "lang/wiki.js",
+      "lang/vb.js",
+      "lang/xq.js",
+      "lang/yaml.js",
+    ];
+    var styles = [
+      "themes/default.css"
+    ];
+    for (var i = 0; i < sources.length; ++i) {
+        document.write("<script src=\"" + sourceBaseUrl + sources[i] + "\"><\/script>");
+    }
+    for (var i = 0; i < styles.length; ++i) {
+        document.write("<link rel=\"stylesheet\" href=\"" + sourceBaseUrl + styles[i] + "\">");
+    }
+})();
+</script>
+
 	</head>
 	<body onload="SyntaxHighligher.all();">
         <pre class="5sh-css">
@@ -14,7 +50,10 @@
             }
         </pre>
 
-        <pre class="sh-coffee">class Animal
+        <pre class="sh-coffee sh-line-inside">class Animal
+  constructor: (@name) -></pre>
+
+        <pre class="sh-coffee sh-line">class Animal
   constructor: (@name) -></pre>
 	</body>
 </html>

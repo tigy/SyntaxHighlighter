@@ -1,31 +1,3 @@
-﻿.sh ol {    float: left;    margin: 0;}.sh ol li {    list-style-type: decimal;}.sh-comment { color: #93a1a1; }
-.sh-literal { color: #195f91; }
-.sh-punctuation, .sh-leftbracket, .sh-rightbracket { color: #93a1a1; }
-.sh-function { color: #dc322f; }
-.sh-string, .sh-attrvalue { color: #D14; }
-.sh-keyword, .sh-tagname { color: #1e347b; }
-.sh-type, .sh-attrname, .sh-declaration, .sh-var { color: teal; }
-.sh-plain { color: #48484c; }
-
-pre.sh {
-  padding: 8px;
-  background-color: #f7f7f9;
-  border: 1px solid #e1e1e8;
-}
-pre.sh-line {
-  -webkit-box-shadow: inset 40px 0 0 #fbfbfc, inset 41px 0 0 #ececf0;
+﻿/* 行号 */.sh-linenumbers-outside {    float: left;    margin: 0;    padding: 5px 0 5px 40px;    margin: 1px 10px 0 1px;    _margin: 1px 5px 0 1px;    background-color: #fbfbfc;    border-right: 1px solid #ececf0;}.sh-linenumbers-inside {    margin: 0;}.sh-linenumbers-outside li, .sh-linenumbers-inside li  {    list-style-type: decimal;}pre.sh {    background-color: #f7f7f9;    border: 1px solid #e1e1e8;    margin:  0;    padding: 5px;}pre.sh-line-inside {    -webkit-box-shadow: inset 40px 0 0 #fbfbfc, inset 41px 0 0 #ececf0;
      -moz-box-shadow: inset 40px 0 0 #fbfbfc, inset 41px 0 0 #ececf0;
-          box-shadow: inset 40px 0 0 #fbfbfc, inset 41px 0 0 #ececf0;
-}
-
-/* Specify class=linenums on a pre to get line numbering */
-ol.sh-line {
-  margin: 0 0 0 33px; /* IE indents via margin-left */
- padding-left: 0;
-} 
-ol.sh-line li {
-  padding-left: 12px;
-  color: #bebec5;
-  line-height: 18px;
-  text-shadow: 0 1px 0 #fff;
-}
+          box-shadow: inset 40px 0 0 #fbfbfc, inset 41px 0 0 #ececf0;}/* 语法 */.sh-comment {    color: #93a1a1;}.sh-literal {    color: #195f91;}.sh-punctuation, .sh-leftbracket, .sh-rightbracket {    color: #93a1a1;}.sh-function {    color: #dc322f;}.sh-string, .sh-attrvalue {    color: #D14;}.sh-keyword, .sh-tagname {    color: #1e347b;}.sh-type, .sh-attrname, .sh-declaration, .sh-var {    color: teal;}.sh-plain {    color: #48484c;}/* Specify class=linenums on a pre to get line numbering */ol.sh-line {    margin: 0 0 0 33px; /* IE indents via margin-left */    padding-left: 0;}    ol.sh-line li {        padding-left: 12px;        color: #bebec5;        line-height: 18px;        text-shadow: 0 1px 0 #fff;    }
