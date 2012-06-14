@@ -49,11 +49,38 @@
                 color: red;
             }
         </pre>
-
-        <pre class="sh-coffee sh-line-inside">class Animal
-  constructor: (@name) -></pre>
-
-        <pre class="sh-coffee sh-line">class Animal
-  constructor: (@name) -></pre>
+        <pre class="sh sh-js sh-line">function walk(node) {
+	switch (node.nodeType) {
+		case 1:
+			// Element
+			for (var child = node.firstChild; child; child = child.nextSibling) {
+				walk(child);
+			}
+			var nodeName = node.nodeName;
+			if ('BR' === nodeName || 'LI' === nodeName) {
+				chunks[k] = '\n';
+				spans[k << 1] = length++;
+				spans[(k++ << 1) | 1] = node;
+			}
+			break;
+		case 3:
+		case 4:
+			// Text
+			var text = node.nodeValue;
+			if (text.length) {
+				if (isPreformatted) {
+					text = text.replace(/\r\n?/g, '\n'); // Normalize newlines.
+				} else {
+					text = text.replace(/[ \t\r\n]+/g, ' ');
+				}
+				// TODO: handle tabs here?
+				chunks[k] = text;
+				spans[k << 1] = length;
+				length += text.length;
+				spans[(k++ << 1) | 1] = node;
+			}
+			break;
+	}
+}</pre>
 	</body>
 </html>

@@ -21,8 +21,12 @@
 	 * @param {Number} lineNumberStyle=0 行号风格。
 	 *
 	 * - 0: (默认)不显示行号
-	 * - 1: 显示行号
-	 * - 2: 显示简单版的行号
+	 * - 1: 显示外部行号
+	 * - 2: 显示内部行号
+	 * - 10: 显示外部行号, 每 5 行标号
+	 * - 20: 显示内部行号, 每 5 行标号
+	 *
+	 *
 	 *
 	 * @param {Number} lineNumberStart=1 第一行的计数。
 	 */
@@ -35,10 +39,18 @@
 			language = (elem.className.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
 		}
 
-		if (lineNumberStyle == undefined) {
-			var match = /\bsh-line(-simple)?\b/i.exec(elem.className);
-			lineNumberStyle = match ? match[1] ? 2 : 1 : 0;
+		if (!lineNumberStyle) {
+			var match = /\bsh-line(-inside|-outside)?\b/i.exec(elem.className);
+			lineNumberStyle = match ? match[1] === '-inside' ? 2 : 1 : 0;
 		}
+
+		//if (lineNumbers == undefined) {
+		//	lineNumbers = ;
+		//}
+
+		//if (indent == undefined) {
+		//	indent = /\bsh-indent\b/i.test(elem.className);
+		//}
 
 		// Extract tags, and convert the source code to plain text.
 		var sourceAndSpans = extractSourceSpans(elem);
@@ -52,41 +64,18 @@
 		// modifying the sourceNode in place.
 		recombineTagsAndDecorations(sourceAndSpans, SH.findBrush(language)(sourceAndSpans.sourceCode, 0));
 
-		if (lineNumberStyle) {
-			createLineNumbers(elem, sourceAndSpans.sourceCode, lineNumberStart, lineNumberStyle === 2);
+		switch (lineNumberStyle) {
+			case 1:
+				className += ' sh-line-outside';
+				createLineNumbers(elem, sourceAndSpans.sourceCode, lineNumberStart);
+				break;
+			case 2:
+				className += ' sh-line-inside';
+				numberLines(elem, lineNumberStart);
+				break;
 		}
 
 		elem.className = (className + " sh sh-" + language);
-		elem.ondblclick = function () {
-			var textarea = document.createElement('textarea');
-			textarea.className = elem.className;
-			textarea.value = sourceAndSpans.sourceCode;
-			textarea.readOnly = true;
-			var width = elem.offsetWidth;
-			var p = elem.previousSibling;
-			if (p && p.className !== 'sh-linenumbers') {
-				p = null;
-			}
-
-			if (p) {
-				p.style.display = 'none';
-			}
-
-			textarea.style.width = elem.offsetWidth - 12 + 'px';
-			textarea.style.height = elem.offsetHeight - 12 + 'px';
-			elem.parentNode.replaceChild(textarea, elem);
-
-			textarea.onblur = function () {
-				textarea.parentNode.replaceChild(elem, textarea);
-				if (p) {
-					p.style.display = '';
-				}
-			};
-
-			// preselect all text
-			textarea.focus();
-			textarea.select();
-		};
 	};
 
 	SH.all = function (callback, parentNode) {
@@ -113,7 +102,7 @@
 		setTimeout(doWork, 0);
 	};
 
-	function createLineNumbers(elem, sourceCode, lineNumberStart, simple) {
+	function createLineNumbers(elem, sourceCode, lineNumberStart) {
 		var r = ['<li class="sh-line0"></li>'],
 			i = -1,
 			line = 1,
@@ -123,12 +112,158 @@
 		}
 
 		ol = document.createElement('pre');
-		ol.className = 'sh-linenumbers' + (simple ? ' sh-linenumbers-simple' : '');
-		ol.innerHTML = '<ol>' + r.join('') + '</ol>';
+		//  ol.className = 'sh-linenumbers-outside';
+		ol.innerHTML = '<ol class="sh-linenumbers-outside">' + r.join('') + '</ol>';
 
 		if(lineNumberStart != undefined)
 			ol.start = lineNumberStart;
 		elem.parentNode.insertBefore(ol, elem);
+	}
+
+	/**
+   * Given a DOM subtree, wraps it in a list, and puts each line into its own
+   * list item.
+   *
+   * @param {Node} node modified in place.  Its content is pulled into an
+   *     HTMLOListElement, and each line is moved into a separate list item.
+   *     This requires cloning elements, so the input might not have unique
+   *     IDs after numbering.
+   */
+	function numberLines(node, opt_startLineNum) {
+		var lineBreak = /\r\n?|\n/;
+
+		var document = node.ownerDocument;
+
+		var whitespace;
+		if (node.currentStyle) {
+			whitespace = node.currentStyle.whiteSpace;
+		} else if (window.getComputedStyle) {
+			whitespace = document.defaultView.getComputedStyle(node, null)
+          .getPropertyValue('white-space');
+		}
+		// If it's preformatted, then we need to split lines on line breaks
+		// in addition to <BR>s.
+		var isPreformatted = whitespace && 'pre' === whitespace.substring(0, 3);
+
+		var li = document.createElement('LI');
+		while (node.firstChild) {
+			li.appendChild(node.firstChild);
+		}
+		// An array of lines.  We split below, so this is initialized to one
+		// un-split line.
+		var listItems = [li];
+
+		function walk(node) {
+			switch (node.nodeType) {
+				case 1:  // Element
+					if ('BR' === node.nodeName) {
+						breakAfter(node);
+						// Discard the <BR> since it is now flush against a </LI>.
+						if (node.parentNode) {
+							node.parentNode.removeChild(node);
+						}
+					} else {
+						for (var child = node.firstChild; child; child = child.nextSibling) {
+							walk(child);
+						}
+					}
+					break;
+				case 3: case 4:  // Text
+					if (isPreformatted) {
+						var text = node.nodeValue;
+						var match = text.match(lineBreak);
+						if (match) {
+							var firstLine = text.substring(0, match.index);
+							node.nodeValue = firstLine;
+							var tail = text.substring(match.index + match[0].length);
+							if (tail) {
+								var parent = node.parentNode;
+								parent.insertBefore(
+                    document.createTextNode(tail), node.nextSibling);
+							}
+							breakAfter(node);
+							if (!firstLine) {
+								// Don't leave blank text nodes in the DOM.
+								node.parentNode.removeChild(node);
+							}
+						}
+					}
+					break;
+			}
+		}
+
+		// Split a line after the given node.
+		function breakAfter(lineEndNode) {
+			// If there's nothing to the right, then we can skip ending the line
+			// here, and move root-wards since splitting just before an end-tag
+			// would require us to create a bunch of empty copies.
+			while (!lineEndNode.nextSibling) {
+				lineEndNode = lineEndNode.parentNode;
+				if (!lineEndNode) { return; }
+			}
+
+			function breakLeftOf(limit, copy) {
+				// Clone shallowly if this node needs to be on both sides of the break.
+				var rightSide = copy ? limit.cloneNode(false) : limit;
+				var parent = limit.parentNode;
+				if (parent) {
+					// We clone the parent chain.
+					// This helps us resurrect important styling elements that cross lines.
+					// E.g. in <i>Foo<br>Bar</i>
+					// should be rewritten to <li><i>Foo</i></li><li><i>Bar</i></li>.
+					var parentClone = breakLeftOf(parent, 1);
+					// Move the clone and everything to the right of the original
+					// onto the cloned parent.
+					var next = limit.nextSibling;
+					parentClone.appendChild(rightSide);
+					for (var sibling = next; sibling; sibling = next) {
+						next = sibling.nextSibling;
+						parentClone.appendChild(sibling);
+					}
+				}
+				return rightSide;
+			}
+
+			var copiedListItem = breakLeftOf(lineEndNode.nextSibling, 0);
+
+			// Walk the parent chain until we reach an unattached LI.
+			for (var parent;
+				// Check nodeType since IE invents document fragments.
+           (parent = copiedListItem.parentNode) && parent.nodeType === 1;) {
+           	copiedListItem = parent;
+           }
+			// Put it on the list of lines for later processing.
+			listItems.push(copiedListItem);
+		}
+
+		// Split lines while there are lines left to split.
+		for (var i = 0;  // Number of lines that have been split so far.
+         i < listItems.length;  // length updated by breakAfter calls.
+         ++i) {
+         	walk(listItems[i]);
+         }
+
+		// Make sure numeric indices show correctly.
+		if (opt_startLineNum === (opt_startLineNum | 0)) {
+			listItems[0].setAttribute('value', opt_startLineNum);
+		}
+
+		var ol = document.createElement('OL');
+		ol.className = 'sh-linenumbers-inside';
+		var offset = Math.max(0, ((opt_startLineNum - 1 /* zero index */)) | 0) || 0;
+		for (var i = 0, n = listItems.length; i < n; ++i) {
+			li = listItems[i];
+			// Stick a class on the LIs so that stylesheets can
+			// color odd/even rows, or any other row pattern that
+			// is co-prime with 10.
+			li.className = 'sh-line' + ((i + offset) % 10);
+			if (!li.firstChild) {
+				li.appendChild(document.createTextNode('\xA0'));
+			}
+			ol.appendChild(li);
+		}
+
+		node.appendChild(ol);
 	}
 
 
