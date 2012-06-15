@@ -44,7 +44,10 @@
         <style>
             #source, #output {
                 float: left;
-                margin-right: 10px;
+                margin:   0 10px 0 0;
+            }
+
+            #source {
                 width: 600px;
                 height: 500px;
             }
@@ -55,7 +58,7 @@
                 var output = document.getElementById('output');
                 output.className = '';
                 output.innerText = output.textContent = document.getElementById('source').value;
-                SyntaxHighligher.one(output, document.getElementById('lang').value, document.getElementById('lineStyles').value);
+                SyntaxHighligher.one(output, document.getElementById('lang').value, document.getElementById('linestyles').checked);
             }
         </script>
 	</head>
@@ -68,21 +71,52 @@
             <option value="html">html</option>
         </select>
         
-        行号： <select id="lineStyles">
-            <option value="0">无</option>
-        </select>
-        
         主题： <select id="theme">
             <option value="default">默认(default)</option>
             <option>js</option>
             <option>css</option>
         </select>
 
+        <input type="checkbox" id="linestyles"/>
+        <label for="linestyles">显示行号</label>
+
         <input type="button" value="语法高亮" onclick="doParse()" />
 
         <hr />
 
-        <textarea placeholder="输入源码..." id="source"></textarea>
+        <textarea placeholder="输入源码..." id="source">function walk(node) {
+	switch (node.nodeType) {
+		case 1:
+			// Element
+			for (var child = node.firstChild; child; child = child.nextSibling) {
+				walk(child);
+			}
+			var nodeName = node.nodeName;
+			if ('BR' === nodeName || 'LI' === nodeName) {
+				chunks[k] = '\n';
+				spans[k << 1] = length++;
+				spans[(k++ << 1) | 1] = node;
+			}
+			break;
+		case 3:
+		case 4:
+			// Text
+			var text = node.nodeValue;
+			if (text.length) {
+				if (isPreformatted) {
+					text = text.replace(/\r\n?/g, '\n'); // Normalize newlines.
+				} else {
+					text = text.replace(/[ \t\r\n]+/g, ' ');
+				}
+				// TODO: handle tabs here?
+				chunks[k] = text;
+				spans[k << 1] = length;
+				length += text.length;
+				spans[(k++ << 1) | 1] = node;
+			}
+			break;
+	}
+}</textarea>
 
         <pre id="output"></pre>
 

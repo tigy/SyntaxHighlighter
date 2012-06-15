@@ -17,34 +17,43 @@
 	/**
 	 * 高亮单一的节点。
 	 * @param {Element} elem 要高亮的节点。
-	 * @param {String} [language] 语言本身。
-	 * @param {Number} lineNumberStyle=0 行号风格。
-	 *
-	 * - 0: (默认)不显示行号
-	 * - 1: 显示行号
-	 * - 2: 显示简单版的行号
-	 *
-	 * @param {Number} lineNumberStart=1 第一行的计数。
+	 * @param {String} [language] 语言本身。系统会自动根据源码猜测语言。
+	 * @param {Number} lineNumberStart=null 第一行的计数，如果是null，则不显示行号。
 	 */
-	SH.one = function (elem, language, lineNumberStyle, lineNumberStart) {
+	SH.one = function (elem, language, lineNumberStart) {
 
-		var className = elem.className.replace(/\bsh[-\w]*\b/g, "");
+		var className = elem.className,
+			sourceAndSpans;
+
+		// 补齐 sh
+		if (!/\bsh\b/.test(className)) {
+			elem.className += ' sh';
+		}
+
+		// 确保是 <pre><code></code><pre> 结构。
+		if (elem.tagName === 'PRE') {
+
+			// 找到 <code>
+			var child = elem.lastChild;
+			while (child && child.nodeType !== 1)
+				child = child.previousSibling;
+
+			if (!child || child.tagName !== 'CODE') {
+				child = document.createElement('code');
+				while (elem.firstChild) {
+					child.appendChild(elem.firstChild);
+				}
+				elem.appendChild(child);
+			}
+			elem = child;
+		}
+		
+		// Extract tags, and convert the source code to plain text.
+		sourceAndSpans = extractSourceSpans(elem);
 
 		// 自动决定 language 和 lineNumbers
 		if (!language) {
-			language = (elem.className.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
-		}
-
-		if (lineNumberStyle == undefined) {
-			var match = /\bsh-line(-simple)?\b/i.exec(elem.className);
-			lineNumberStyle = match ? match[1] ? 2 : 1 : 0;
-		}
-
-		// Extract tags, and convert the source code to plain text.
-		var sourceAndSpans = extractSourceSpans(elem);
-
-		if (!language) {
-			language = SH.guessLanguage(sourceAndSpans.sourceCode);
+			language = (className.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1] || SH.guessLanguage(sourceAndSpans.sourceCode);
 		}
 
 		// Apply the appropriate language handler
@@ -52,47 +61,18 @@
 		// modifying the sourceNode in place.
 		recombineTagsAndDecorations(sourceAndSpans, SH.findBrush(language)(sourceAndSpans.sourceCode, 0));
 
-		if (lineNumberStyle) {
-			createLineNumbers(elem, sourceAndSpans.sourceCode, lineNumberStart, lineNumberStyle === 2);
+		if (lineNumberStart != undefined ? lineNumberStart !== false : +/\bsh-line?\b/i.test(className)) {
+			createLineNumbers(elem, sourceAndSpans.sourceCode, +lineNumberStart);
 		}
 
-		elem.className = (className + " sh sh-" + language);
-		elem.ondblclick = function () {
-			var textarea = document.createElement('textarea');
-			textarea.className = elem.className;
-			textarea.value = sourceAndSpans.sourceCode;
-			textarea.readOnly = true;
-			var width = elem.offsetWidth;
-			var p = elem.previousSibling;
-			if (p && p.className !== 'sh-linenumbers') {
-				p = null;
-			}
-
-			if (p) {
-				p.style.display = 'none';
-			}
-
-			textarea.style.width = elem.offsetWidth - 12 + 'px';
-			textarea.style.height = elem.offsetHeight - 12 + 'px';
-			elem.parentNode.replaceChild(textarea, elem);
-
-			textarea.onblur = function () {
-				textarea.parentNode.replaceChild(elem, textarea);
-				if (p) {
-					p.style.display = '';
-				}
-			};
-
-			// preselect all text
-			textarea.focus();
-			textarea.select();
-		};
+		elem.className = 'sh-sourcecode sh-' + language;
+		elem.ondblclick = handlerDblclick;
 	};
 
 	SH.all = function (callback, parentNode) {
 		var elements = [],
-				pres = (parentNode || document).getElementsByTagName('pre'),
-				i = 0;
+			pres = (parentNode || document).getElementsByTagName('pre'),
+			i = 0;
 
 		for (; pres[i]; i++) {
 			if (/\bsh(-|\b)/.test(pres[i].className))
@@ -110,27 +90,46 @@
 			}
 		}
 
-		setTimeout(doWork, 0);
+		doWork();
 	};
 
-	function createLineNumbers(elem, sourceCode, lineNumberStart, simple) {
-		var r = ['<li class="sh-line0"></li>'],
+	function createLineNumbers(elem, sourceCode, lineNumberStart) {
+		var r = ['<li class="sh-linenumber0"></li>'],
 			i = -1,
 			line = 1,
 			ol;
 		while ((i = sourceCode.indexOf('\n', i + 1)) >= 0) {
-			r.push('<li class="sh-line' + (line++ % 10) + '"></li>');
+			r.push('<li class="sh-linenumber' + (line++ % 10) + '"></li>');
 		}
 
-		ol = document.createElement('pre');
-		ol.className = 'sh-linenumbers' + (simple ? ' sh-linenumbers-simple' : '');
-		ol.innerHTML = '<ol>' + r.join('') + '</ol>';
+		ol = document.createElement('ol');
+		ol.className = 'sh-linenumbers';
+		ol.innerHTML = r.join('');
 
-		if(lineNumberStart != undefined)
+		if(!isNaN(lineNumberStart))
 			ol.start = lineNumberStart;
 		elem.parentNode.insertBefore(ol, elem);
 	}
 
+	function handlerDblclick() {
+		var elem = this.parentNode,
+			textarea = document.createElement('textarea');
+
+		textarea.className = 'sh sh-textarea';
+		textarea.value = elem.textContent || elem.innerText;
+		textarea.readOnly = true;
+		textarea.style.width = elem.offsetWidth - 12 + 'px';
+		textarea.style.height = elem.offsetHeight - 12 + 'px';
+
+		textarea.onblur = function () {
+			textarea.parentNode.replaceChild(elem, textarea);
+		};
+		elem.parentNode.replaceChild(textarea, elem);
+
+		// preselect all text
+		textarea.focus();
+		textarea.select();
+	}
 
 	/**
 	 * Split markup into a string of source code and an array mapping ranges in
