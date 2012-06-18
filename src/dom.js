@@ -53,7 +53,7 @@
 
 		// 自动决定 language 和 lineNumbers
 		if (!language) {
-			language = (className.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1] || SH.guessLanguage(sourceAndSpans.sourceCode);
+			language = (className.replace(/\bsh-line\b/, "").match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1] || SH.guessLanguage(sourceAndSpans.sourceCode);
 		}
 
 		// Apply the appropriate language handler
@@ -94,32 +94,32 @@
 	};
 
 	function createLineNumbers(elem, sourceCode, lineNumberStart) {
-		var r = ['<li class="sh-linenumber0"></li>'],
+		var space = document.constructor ? '' : '&nbsp;',
+			r = ['<li class="demo-sh-linenumber0">' + space + '</li>'],
 			i = -1,
 			line = 1,
 			ol;
 		while ((i = sourceCode.indexOf('\n', i + 1)) >= 0) {
-			r.push('<li class="sh-linenumber' + (line++ % 10) + '"></li>');
+			r.push('<li class="demo-sh-linenumber' + (line++ % 10) + '">' + space + '</li>');
 		}
 
 		ol = document.createElement('ol');
-		ol.className = 'sh-linenumbers';
+		ol.className = 'demo-sh-linenumbers';
 		ol.innerHTML = r.join('');
 
-		if(!isNaN(lineNumberStart))
-			ol.start = lineNumberStart;
+		if (!isNaN(lineNumberStart)) ol.start = lineNumberStart;
 		elem.parentNode.insertBefore(ol, elem);
 	}
 
 	function handlerDblclick() {
-		var elem = this.parentNode,
+		var elem = this,
 			textarea = document.createElement('textarea');
 
-		textarea.className = 'sh sh-textarea';
+		textarea.className = 'sh-textarea';
 		textarea.value = elem.textContent || elem.innerText;
 		textarea.readOnly = true;
-		textarea.style.width = elem.offsetWidth - 12 + 'px';
-		textarea.style.height = elem.offsetHeight - 12 + 'px';
+		textarea.style.width = elem.offsetWidth - 10 + 'px';
+		textarea.style.height = elem.offsetHeight - 10 + 'px';
 
 		textarea.onblur = function () {
 			textarea.parentNode.replaceChild(elem, textarea);
