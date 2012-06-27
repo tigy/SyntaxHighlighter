@@ -28,16 +28,3 @@ J+本身就是为了二次开发而做的，用户可以轻松地以J+为基础�
 * 组件构架透明。添加组件非常方便，并且可以完美地融入组件库。
 * 在代码上完全**面向对象**，方便修改和扩展。
 * 统一规范。让不同的组件之间可以协同工作。
-
-### 如何开始
-
-##### 直接使用
-
-从此处下载最新版本： [https://github.com/jplusui/release](https://github.com/jplusui/release)
-
-##### 二次开发
-
-git fork [https://github.com/jplusui/jplus-milk](https://github.com/jplusui/jplus-milk)
-
-
-
