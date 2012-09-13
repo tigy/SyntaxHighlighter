@@ -56,7 +56,7 @@
         <script>
             function doParse() {
                 var output = document.getElementById('output');
-                output.className = 'sh';
+                output.className = '';
                 output.innerText = output.textContent = document.getElementById('source').value;
                 SyntaxHighligher.one(output, document.getElementById('lang').value, document.getElementById('linestyles').checked);
             }
@@ -69,13 +69,12 @@
             <option value="js">js</option>
             <option value="css">css</option>
             <option value="html">html</option>
-            <option value="cpp">C++</option>
-            <option value="cs">C#</option>
-            <option value="vb">VB</option>
         </select>
         
         主题： <select id="theme">
             <option value="default">默认(default)</option>
+            <option>js</option>
+            <option>css</option>
         </select>
 
         <input type="checkbox" id="linestyles"/>

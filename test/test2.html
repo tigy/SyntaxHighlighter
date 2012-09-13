@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>J+ Library</title>
+		<script type="text/javascript">(function () {
+    var sourceBaseUrl = "../src/";
+    var sources = [
+      "core.js",
+      "dom.js",
+      "text.js",
+      "lang/common.js",
+      "lang/apollo.js",
+      "lang/clj.js",
+      "lang/coffee.js",
+      "lang/css.js",
+      "lang/go.js",
+      "lang/hs.js",
+      "lang/lisp.js",
+      "lang/lua.js",
+      "lang/ml.js",
+      "lang/n.js",
+      "lang/php.js",
+      "lang/proto.js",
+      "lang/scala.js",
+      "lang/sql.js",
+      "lang/tex.js",
+      "lang/vhdl.js",
+      "lang/wiki.js",
+      "lang/vb.js",
+      "lang/xq.js",
+      "lang/yaml.js",
+    ];
+    var styles = [
+      "themes/default.css"
+    ];
+    for (var i = 0; i < sources.length; ++i) {
+        document.write("<script src=\"" + sourceBaseUrl + sources[i] + "\"><\/script>");
+    }
+    for (var i = 0; i < styles.length; ++i) {
+        document.write("<link rel=\"stylesheet\" href=\"" + sourceBaseUrl + styles[i] + "\">");
+    }
+})();
+</script>
+
+	</head>
+	<body>
+
+        <pre id="a">
+            .ccc{
+                color: red;
+            }
+        </pre>
+
+
+        <style>
+            
+
+            .sh ol {
+                float: left;
+                margin: 0;
+            }
+        </style>
+		
+
+        <script>
+
+
+            SyntaxHighligher.one(document.getElementById('a'), 'css');
+
+       //     console.log(SyntaxHighligher.highlight('.a{color:red}', 'css'));
+
+
+        </script>
+		
+		   <div class="sh">
+        
+             <ol style=""><li></li><li></li><li></li></ol><pre> <span class="tag">&lt;script&gt;</span><span class="pln">
+if(1) {
+    alert('Hello ' + String(world));
+}
+
+                 
+if(2) {
+    alert('Hello ' + String(world));
+}
+
+
+
+
+                 
+if(3) {
+    alert('Hello ' + String(world));
+}
+</span><span class="tag">&lt;script&gt;</span></pre>
+        </div>
+       
+		
+		
+		
+		
+	</body>
+</html>

@@ -15,67 +15,64 @@
 (function (SH) {
 
 	/**
+	 * 快速高亮单一的节点。
+	 * @param {Element} elem 要高亮的节点。
+	 * @param {String} [language] 语言本身。系统会自动根据源码猜测语言。
+	 * @param {Number} lineNumberStart=null 第一行的计数，如果是null，则不显示行号。
+	 */
+	SH.quickOne = function(elem, language, lineNumberStart) {
+		syntaxHighlight(elem, elem, language, lineNumberStart);
+	};
+	
+	/**
 	 * 高亮单一的节点。
 	 * @param {Element} elem 要高亮的节点。
 	 * @param {String} [language] 语言本身。系统会自动根据源码猜测语言。
 	 * @param {Number} lineNumberStart=null 第一行的计数，如果是null，则不显示行号。
 	 */
 	SH.one = function (elem, language, lineNumberStart) {
-
-		var className = elem.className,
-			sourceAndSpans;
-
-		// 补齐 sh
-		if (!/\bsh\b/.test(className)) {
-			elem.className += ' sh';
-		}
+	
+		var pre,
+			code;
 
 		// 确保是 <pre><code></code><pre> 结构。
 		if (elem.tagName === 'PRE') {
+		
+			pre = elem;
 
 			// 找到 <code>
-			var child = elem.lastChild;
-			while (child && child.nodeType !== 1)
-				child = child.previousSibling;
+			code = elem.lastChild;
+			while (code && code.nodeType !== 1)
+				code = code.previousSibling;
 
-			if (!child || child.tagName !== 'CODE') {
-				child = document.createElement('code');
+			if (!code || code.tagName !== 'CODE') {
+				code = document.createElement('code');
 				while (elem.firstChild) {
-					child.appendChild(elem.firstChild);
+					code.appendChild(elem.firstChild);
 				}
-				elem.appendChild(child);
+				code.className = 'sh-code';
+				elem.appendChild(code);
 			}
-			elem = child;
+		} else {
+			pre = code = elem;
 		}
 		
-		// Extract tags, and convert the source code to plain text.
-		sourceAndSpans = extractSourceSpans(elem);
+		syntaxHighlight(code, pre, language, lineNumberStart);
 
-		// 自动决定 language 和 lineNumbers
-		if (!language) {
-			language = (className.replace(/\bsh-line\b/, "").match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1] || SH.guessLanguage(sourceAndSpans.sourceCode);
-		}
-
-		// Apply the appropriate language handler
-		// Integrate the decorations and tags back into the source code,
-		// modifying the sourceNode in place.
-		recombineTagsAndDecorations(sourceAndSpans, SH.findBrush(language)(sourceAndSpans.sourceCode, 0));
-
-		if (lineNumberStart != undefined ? lineNumberStart !== false : +/\bsh-line?\b/i.test(className)) {
-			createLineNumbers(elem, sourceAndSpans.sourceCode, +lineNumberStart);
-		}
-
-		elem.className = 'sh-sourcecode sh-' + language;
-		elem.ondblclick = handlerDblclick;
+		code.ondblclick = handlerDblclick;
 	};
-
+	
+	/**
+	 * 高亮页面上全部节点。
+	 * @remark 解析是针对全部 PRE.sh 节点的。
+	 */
 	SH.all = function (callback, parentNode) {
 		var elements = [],
 			pres = (parentNode || document).getElementsByTagName('pre'),
 			i = 0;
 
 		for (; pres[i]; i++) {
-			if (/\bsh(-|\b)/.test(pres[i].className))
+			if (/\bsh\b/.test(pres[i].className))
 				elements.push(pres[i]);
 		}
 
@@ -92,19 +89,45 @@
 
 		doWork();
 	};
+	
+	function syntaxHighlight(code, pre, language, lineNumberStart) {
+		
+		// Extract tags, and convert the source code to plain text.
+		var sourceAndSpans = extractSourceSpans(code),
+			replaceLine = pre.className.replace(/\bsh-line\b/, ""),
+			specificLanuage = (replaceLine.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
 
+		// 自动决定 language 和 lineNumbers
+		if (!language) {
+			language = specificLanuage || SH.guessLanguage(sourceAndSpans.sourceCode);
+		} 
+		
+		if(!specificLanuage) {
+			pre.className += ' sh-' + language;
+		}
+
+		// Apply the appropriate language handler
+		// Integrate the decorations and tags back into the source code,
+		// modifying the sourceNode in place.
+		recombineTagsAndDecorations(sourceAndSpans, SH.findBrush(language)(sourceAndSpans.sourceCode, 0));
+
+		if (lineNumberStart != undefined ? lineNumberStart !== false : replaceLine.length < pre.className.length) {
+			createLineNumbers(code, sourceAndSpans.sourceCode, +lineNumberStart);
+		}
+	}
+	
 	function createLineNumbers(elem, sourceCode, lineNumberStart) {
 		var space = document.constructor ? '' : '&nbsp;',
-			r = ['<li class="demo-sh-linenumber0">' + space + '</li>'],
+			r = ['<li class="sh-linenumber0">' + space + '</li>'],
 			i = -1,
 			line = 1,
 			ol;
 		while ((i = sourceCode.indexOf('\n', i + 1)) >= 0) {
-			r.push('<li class="demo-sh-linenumber' + (line++ % 10) + '">' + space + '</li>');
+			r.push('<li class="sh-linenumber' + (line++ % 10) + '">' + space + '</li>');
 		}
 
 		ol = document.createElement('ol');
-		ol.className = 'demo-sh-linenumbers';
+		ol.className = 'sh-linenumbers';
 		ol.innerHTML = r.join('');
 
 		if (!isNaN(lineNumberStart)) ol.start = lineNumberStart;
@@ -118,8 +141,8 @@
 		textarea.className = 'sh-textarea';
 		textarea.value = elem.textContent || elem.innerText;
 		textarea.readOnly = true;
-		textarea.style.width = elem.offsetWidth - 10 + 'px';
-		textarea.style.height = elem.offsetHeight - 10 + 'px';
+		textarea.style.width = elem.offsetWidth + 'px';
+		textarea.style.height = elem.offsetHeight - 12 + 'px';
 
 		textarea.onblur = function () {
 			textarea.parentNode.replaceChild(elem, textarea);
@@ -211,7 +234,8 @@
 						if (isPreformatted) {
 							text = text.replace(/\r\n?/g, '\n'); // Normalize newlines.
 						} else {
-							text = text.replace(/[ \t\r\n]+/g, ' ');
+							text = text.replace(/[\r\n]+/g, '\r\n　');
+							text = text.replace(/[ \t]+/g, ' ');
 						}
 						// TODO: handle tabs here?
 						chunks[k] = text;
@@ -245,7 +269,7 @@
 	 * @private
 	 */
 	function recombineTagsAndDecorations(sourceAndSpans, decorations) {
-		var isIE = /\bMSIE\b/.test(navigator.userAgent);
+		//var isIE = /\bMSIE\b/.test(navigator.userAgent);
 		var newlineRe = /\n/g;
 
 		var source = sourceAndSpans.sourceCode;
@@ -283,9 +307,9 @@
 				// Emitting Windows standard issue linebreaks (CRLF) causes a blank
 				// space to appear at the beginning of every line but the first.
 				// Emitting an old Mac OS 9 line separator makes everything spiffy.
-				if (isIE) {
-					styledText = styledText.replace(newlineRe, '\r');
-				}
+				// if (isIE) {
+					// styledText = styledText.replace(newlineRe, '\r');
+				// }
 				textNode.nodeValue = styledText;
 				var document = textNode.ownerDocument;
 				var span = document.createElement('SPAN');
