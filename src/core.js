@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-(function () {
-
+var SyntaxHighligher = (function () {
+	
 	/**
 	 * @namespace SyntaxHighligher
 	 */
-	var SH = window.SyntaxHighligher = {
+	var SH = {
 
 		/**
 		 * 所有可用的刷子。
@@ -45,15 +45,11 @@
 		 */
 		createBrush: function (stylePatterns) {
 			var shortcuts = {},
- 				tokenizer,
-				stylePatternsStart = 0,
+				tokenizer, stylePatternsStart = 0,
 				stylePatternsEnd = stylePatterns.length;
 			(function () {
 				var allRegexs = [],
-					i,
-					stylePattern,
-					shortcutChars,
-					c;
+					i, stylePattern, shortcutChars, c;
 				for (i = 0; i < stylePatternsEnd; i++) {
 					stylePattern = stylePatterns[i];
 					if ((shortcutChars = stylePattern[2])) {
@@ -61,16 +57,13 @@
 							shortcuts[shortcutChars.charAt(c)] = stylePattern;
 						}
 
-						if (i == stylePatternsStart)
-							stylePatternsStart++;
+						if (i == stylePatternsStart) stylePatternsStart++;
 					}
 					allRegexs.push(stylePattern[1]);
 				}
 				allRegexs.push(/[\0-\uffff]/);
 				tokenizer = combinePrefixPatterns(allRegexs);
 			})();
-
-			return decorate;
 
 			function decorate(sourceCode, position) {
 				/** Even entries are positions in source in ascending order.  Odd enties
@@ -79,16 +72,13 @@
 				 * @type {Array<number/string>}
 				 */
 				var decorations = [position, 'plain'],
- 					tokens = sourceCode.match(tokenizer) || [],
- 					pos = 0, // index into sourceCode
- 					styleCache = {},
+					tokens = sourceCode.match(tokenizer) || [],
+					pos = 0,
+					// index into sourceCode
+					styleCache = {},
 					ti = 0,
 					nTokens = tokens.length,
-					token,
-					style,
-					match,
-					isEmbedded,
-					stylePattern;
+					token, style, match, isEmbedded, stylePattern;
 
 				while (ti < nTokens) {
 					token = tokens[ti++];
@@ -161,6 +151,8 @@
 				removeEmptyAndNestedDecorations(decorations);
 				return decorations;
 			};
+			
+			return decorate;
 		},
 
 		/**
@@ -196,9 +188,8 @@
 				SH.brushes[language[i]] = stylePatterns;
 			}
 		}
-
+		
 	};
-
 
 	// CAVEAT: this does not properly handle the case where a regular
 	// expression immediately follows another since a regular expression may
@@ -228,114 +219,6 @@
 				ignoreCase = false;
 				break;
 			}
-		}
-
-		var escapeCharToCodeUnit = {
-			'b': 8,
-			't': 9,
-			'n': 0xa,
-			'v': 0xb,
-			'f': 0xc,
-			'r': 0xd
-		};
-
-		function decodeEscape(charsetPart) {
-			var cc0 = charsetPart.charCodeAt(0);
-			if (cc0 !== 92 /* \\ */) {
-				return cc0;
-			}
-			var c1 = charsetPart.charAt(1);
-			cc0 = escapeCharToCodeUnit[c1];
-			if (cc0) {
-				return cc0;
-			} else if ('0' <= c1 && c1 <= '7') {
-				return parseInt(charsetPart.substring(1), 8);
-			} else if (c1 === 'u' || c1 === 'x') {
-				return parseInt(charsetPart.substring(2), 16);
-			} else {
-				return charsetPart.charCodeAt(1);
-			}
-		}
-
-		function encodeEscape(charCode) {
-			if (charCode < 0x20) {
-				return (charCode < 0x10 ? '\\x0' : '\\x') + charCode.toString(16);
-			}
-			var ch = String.fromCharCode(charCode);
-			if (ch === '\\' || ch === '-' || ch === '[' || ch === ']') {
-				ch = '\\' + ch;
-			}
-			return ch;
-		}
-
-		function caseFoldCharset(charSet) {
-			var charsetParts = charSet.substring(1, charSet.length - 1).match(
-			new RegExp('\\\\u[0-9A-Fa-f]{4}' + '|\\\\x[0-9A-Fa-f]{2}' + '|\\\\[0-3][0-7]{0,2}' + '|\\\\[0-7]{1,2}' + '|\\\\[\\s\\S]' + '|-' + '|[^-\\\\]', 'g'));
-			var groups = [];
-			var ranges = [];
-			var inverse = charsetParts[0] === '^';
-			for (var i = inverse ? 1 : 0, n = charsetParts.length; i < n; ++i) {
-				var p = charsetParts[i];
-				if (/\\[bdsw]/i.test(p)) { // Don't muck with named groups.
-					groups.push(p);
-				} else {
-					var start = decodeEscape(p);
-					var end;
-					if (i + 2 < n && '-' === charsetParts[i + 1]) {
-						end = decodeEscape(charsetParts[i + 2]);
-						i += 2;
-					} else {
-						end = start;
-					}
-					ranges.push([start, end]);
-					// If the range might intersect letters, then expand it.
-					// This case handling is too simplistic.
-					// It does not deal with non-latin case folding.
-					// It works for latin source code identifiers though.
-					if (!(end < 65 || start > 122)) {
-						if (!(end < 65 || start > 90)) {
-							ranges.push([Math.max(65, start) | 32, Math.min(end, 90) | 32]);
-						}
-						if (!(end < 97 || start > 122)) {
-							ranges.push([Math.max(97, start) & ~32, Math.min(end, 122) & ~32]);
-						}
-					}
-				}
-			}
-
-			// [[1, 10], [3, 4], [8, 12], [14, 14], [16, 16], [17, 17]]
-			// -> [[1, 12], [14, 14], [16, 17]]
-			ranges.sort(function (a, b) {
-				return (a[0] - b[0]) || (b[1] - a[1]);
-			});
-			var consolidatedRanges = [];
-			var lastRange = [NaN, NaN];
-			for (var i = 0; i < ranges.length; ++i) {
-				var range = ranges[i];
-				if (range[0] <= lastRange[1] + 1) {
-					lastRange[1] = Math.max(lastRange[1], range[1]);
-				} else {
-					consolidatedRanges.push(lastRange = range);
-				}
-			}
-
-			var out = ['['];
-			if (inverse) {
-				out.push('^');
-			}
-			out.push.apply(out, groups);
-			for (var i = 0; i < consolidatedRanges.length; ++i) {
-				var range = consolidatedRanges[i];
-				out.push(encodeEscape(range[0]));
-				if (range[1] > range[0]) {
-					if (range[1] + 1 > range[0]) {
-						out.push('-');
-					}
-					out.push(encodeEscape(range[1]));
-				}
-			}
-			out.push(']');
-			return out.join('');
 		}
 
 		function allowAnywhereFoldCaseAndRenumberGroups(regex) {
@@ -445,6 +328,114 @@
 		return new RegExp(rewritten.join('|'), ignoreCase ? 'gi' : 'g');
 	}
 
+	function encodeEscape(charCode) {
+		if (charCode < 0x20) {
+			return (charCode < 0x10 ? '\\x0' : '\\x') + charCode.toString(16);
+		}
+		var ch = String.fromCharCode(charCode);
+		if (ch === '\\' || ch === '-' || ch === '[' || ch === ']') {
+			ch = '\\' + ch;
+		}
+		return ch;
+	}
+	
+	var escapeCharToCodeUnit = {
+		'b': 8,
+		't': 9,
+		'n': 0xa,
+		'v': 0xb,
+		'f': 0xc,
+		'r': 0xd
+	};
+
+	function decodeEscape(charsetPart) {
+		var cc0 = charsetPart.charCodeAt(0);
+		if (cc0 !== 92 /* \\ */) {
+			return cc0;
+		}
+		var c1 = charsetPart.charAt(1);
+		cc0 = escapeCharToCodeUnit[c1];
+		if (cc0) {
+			return cc0;
+		} else if ('0' <= c1 && c1 <= '7') {
+			return parseInt(charsetPart.substring(1), 8);
+		} else if (c1 === 'u' || c1 === 'x') {
+			return parseInt(charsetPart.substring(2), 16);
+		} else {
+			return charsetPart.charCodeAt(1);
+		}
+	}
+
+	function caseFoldCharset(charSet) {
+		var charsetParts = charSet.substring(1, charSet.length - 1).match(
+		new RegExp('\\\\u[0-9A-Fa-f]{4}' + '|\\\\x[0-9A-Fa-f]{2}' + '|\\\\[0-3][0-7]{0,2}' + '|\\\\[0-7]{1,2}' + '|\\\\[\\s\\S]' + '|-' + '|[^-\\\\]', 'g'));
+		var groups = [];
+		var ranges = [];
+		var inverse = charsetParts[0] === '^';
+		for (var i = inverse ? 1 : 0, n = charsetParts.length; i < n; ++i) {
+			var p = charsetParts[i];
+			if (/\\[bdsw]/i.test(p)) { // Don't muck with named groups.
+				groups.push(p);
+			} else {
+				var start = decodeEscape(p);
+				var end;
+				if (i + 2 < n && '-' === charsetParts[i + 1]) {
+					end = decodeEscape(charsetParts[i + 2]);
+					i += 2;
+				} else {
+					end = start;
+				}
+				ranges.push([start, end]);
+				// If the range might intersect letters, then expand it.
+				// This case handling is too simplistic.
+				// It does not deal with non-latin case folding.
+				// It works for latin source code identifiers though.
+				if (!(end < 65 || start > 122)) {
+					if (!(end < 65 || start > 90)) {
+						ranges.push([Math.max(65, start) | 32, Math.min(end, 90) | 32]);
+					}
+					if (!(end < 97 || start > 122)) {
+						ranges.push([Math.max(97, start) & ~32, Math.min(end, 122) & ~32]);
+					}
+				}
+			}
+		}
+
+		// [[1, 10], [3, 4], [8, 12], [14, 14], [16, 16], [17, 17]]
+		// -> [[1, 12], [14, 14], [16, 17]]
+		ranges.sort(function (a, b) {
+			return (a[0] - b[0]) || (b[1] - a[1]);
+		});
+		var consolidatedRanges = [];
+		var lastRange = [NaN, NaN];
+		for (var i = 0; i < ranges.length; ++i) {
+			var range = ranges[i];
+			if (range[0] <= lastRange[1] + 1) {
+				lastRange[1] = Math.max(lastRange[1], range[1]);
+			} else {
+				consolidatedRanges.push(lastRange = range);
+			}
+		}
+
+		var out = ['['];
+		if (inverse) {
+			out.push('^');
+		}
+		out.push.apply(out, groups);
+		for (var i = 0; i < consolidatedRanges.length; ++i) {
+			var range = consolidatedRanges[i];
+			out.push(encodeEscape(range[0]));
+			if (range[1] > range[0]) {
+				if (range[1] + 1 > range[0]) {
+					out.push('-');
+				}
+				out.push(encodeEscape(range[1]));
+			}
+		}
+		out.push(']');
+		return out.join('');
+	}
+
 	/**
 	 * Apply the given language handler to sourceCode and add the resulting
 	 * decorations to out.
@@ -479,4 +470,6 @@
 
 	}
 
+	return SH;
+	
 })();

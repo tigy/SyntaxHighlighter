@@ -136,7 +136,31 @@ function go(goldens) {
 	startClock();
 
 	SyntaxHighligher.one(document.getElementById('htmlXmp'));
-  SyntaxHighligher.all(function () { stopClock(); runTests(goldens); });
+	syntaxHighlighAll(function () { stopClock(); runTests(goldens); });
+}
+
+function syntaxHighlighAll(callback){
+	var elements = [],
+		pres = document.getElementsByTagName('pre'),
+		i = 0;
+
+	for (; pres[i]; i++) {
+		if (/\bsh(-|\b)/.test(pres[i].className))
+			elements.push(pres[i]);
+	}
+
+	pres = null;
+
+	function doWork() {
+		if (elements.length) {
+			SyntaxHighligher.quickOne(elements.shift());
+			setTimeout(doWork, 50);
+		} else if (callback) {
+			callback();
+		}
+	}
+
+	doWork();
 }
 
 function runTests(goldens) {
