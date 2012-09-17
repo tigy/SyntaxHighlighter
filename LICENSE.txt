@@ -1,6 +1,6 @@
 ﻿The BSD License
 
-Copyright (c) 2010-2012, JPlusUI Team
+Copyright (c) 2010-2012, xuld
 All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
