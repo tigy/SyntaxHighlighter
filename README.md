@@ -11,12 +11,14 @@ SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。
 
 # 用法
 
-## 首先引入 build 文件夹下的 syntaxhighlighter.css 和 syntaxhighlighter.js 。
+## 1. 引入 SyntaxHighligherPlus
+	引入 build 文件夹下的 syntaxhighlighter.css 和 syntaxhighlighter.js 。
 
 	<link href="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.css" rel="stylesheet" type="text/css">
 	<script src="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.js" type="text/javascript"></script>
 
-## 然后使用 <script>SyntaxHighligher.all()</script> 可以自动处理所以标记有sh的标签。
+## 2. 高亮标签
+	使用 <script>SyntaxHighligher.all()</script> 可以自动处理所以标记有sh的标签。
 
 	<body onload="SyntaxHighligher.all();">
 		
