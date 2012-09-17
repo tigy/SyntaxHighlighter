@@ -1,10 +1,22 @@
 # SyntaxHighligherPlus 概述
 
-SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。它支持大部分编程语言。且支持自定义行号、主题、语言。
+SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。
 
-# 示例
+# 特性
 
-## Hello world
+- 支持大部分编程语言。（如Html，Javascript 等常见语言都内置）
+- 支持自定义行号、主题、语言。
+- 支持 Nodejs 等非浏览器坏境。
+- 支持自动识别语言。
+
+# 用法
+
+## 首先引入 build 文件夹下的 syntaxhighlighter.css 和 syntaxhighlighter.js 。
+
+	<link href="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.css" rel="stylesheet" type="text/css">
+	<script src="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.js" type="text/javascript"></script>
+
+## 然后使用 <script>SyntaxHighligher.all()</script> 可以自动处理所以标记有sh的标签。
 
 	<body onload="SyntaxHighligher.all();">
 		
@@ -12,8 +24,6 @@ SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。它支持大�
 		  constructor: (@name) -></pre>
 	
 	</body>
-
-使用 <script>SyntaxHighligher.all()</script> 可以自动处理所以标记有sh的标签。
 
 ## 指定语言
 
@@ -29,3 +39,10 @@ SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。它支持大�
 # API
 
 框架提供了一个 SyntaxHighligher 对象，通过该对象可以实现特定的高亮需求。具体可参考文档和源码。
+
+常用的API有：
+
+- SyntaxHighligher.all(): 高亮页面内全部 pre.sh 标签。
+- SyntaxHighligher.one(pre, language, startLineNumber): 高亮页面内指定的 pre 标签。
+- SyntaxHighligher.quickOne(pre): 仅高亮指定的 pre 标签, 不额外处理DOM标签。（如不支持双击复制代码）
+- SyntaxHighligher.highlight(sourceCode): 输入代码片段，返回高亮后的 HTML 代码。
