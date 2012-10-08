@@ -91,18 +91,19 @@
 	};
 	
 	function syntaxHighlight(code, pre, language, lineNumberStart) {
-		
+
 		// Extract tags, and convert the source code to plain text.
 		var sourceAndSpans = extractSourceSpans(code),
-			replaceLine = pre.className.replace(/\bsh-line\b/, ""),
+			className = pre.className,
+			replaceLine = className.replace(/\bsh-line\b/, ""),
 			specificLanuage = (replaceLine.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
 
 		// 自动决定 language 和 lineNumbers
 		if (!language) {
 			language = specificLanuage || SH.guessLanguage(sourceAndSpans.sourceCode);
-		} 
-		
-		if(!specificLanuage) {
+		}
+
+		if (!specificLanuage) {
 			pre.className += ' sh-' + language;
 		}
 
@@ -110,8 +111,8 @@
 		// Integrate the decorations and tags back into the source code,
 		// modifying the sourceNode in place.
 		recombineTagsAndDecorations(sourceAndSpans, SH.findBrush(language)(sourceAndSpans.sourceCode, 0));
-
-		if (lineNumberStart != undefined ? lineNumberStart !== false : replaceLine.length < pre.className.length) {
+		
+		if (lineNumberStart != undefined ? lineNumberStart !== false : replaceLine.length < className.length) {
 			createLineNumbers(code, sourceAndSpans.sourceCode, +lineNumberStart);
 		}
 	}
