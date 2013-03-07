@@ -15,8 +15,8 @@ SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。
 
 引入 build 文件夹下的 syntaxhighlighter.css 和 syntaxhighlighter.js 。
 
-	<link href="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.css" rel="stylesheet" type="text/css">
-	<script src="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.js" type="text/javascript"></script>
+	<link href="https://raw.github.com/jplusui/SyntaxHighligherPlus/master/build/syntaxhighlighter.css" rel="stylesheet" type="text/css">
+	<script src="https://raw.github.com/jplusui/SyntaxHighligherPlus/master/build/syntaxhighlighter.js" type="text/javascript"></script>
 
 ## 2. 高亮标签
 

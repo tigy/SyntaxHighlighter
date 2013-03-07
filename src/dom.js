@@ -30,7 +30,7 @@
 	 * @param {String} [language] 语言本身。系统会自动根据源码猜测语言。
 	 * @param {Number} lineNumberStart=null 第一行的计数，如果是null，则不显示行号。
 	 */
-	SH.one = function (elem, language, lineNumberStart) {
+	SH.one = function (elem, language, lineNumberStart, bindDblClick) {
 	
 		var pre,
 			code;
@@ -58,29 +58,60 @@
 		}
 		
 		syntaxHighlight(code, pre, language, lineNumberStart);
-
-		code.ondblclick = handlerDblclick;
+		
+		if(bindDblClick !== false){
+			code.ondblclick = handlerDblclick;
+		}
 	};
-	
+
 	/**
 	 * 高亮页面上全部节点。
 	 * @remark 解析是针对全部 PRE.sh 节点的。
 	 */
-	SH.all = function (callback, parentNode) {
+	SH.all = function (callback, parentNode, bindDblClick) {
 		var elements = [],
-			pres = (parentNode || document).getElementsByTagName('pre'),
-			i = 0;
+			nodes = (parentNode || document).getElementsByTagName('pre'),
+			node,
+			i,
+			j;
 
-		for (; pres[i]; i++) {
-			if (/\bsh\b/.test(pres[i].className))
-				elements.push(pres[i]);
+		for (i = 0; node = nodes[i]; i++) {
+			if (/\bsh\b/.test(node.className))
+				elements.push(node);
 		}
 
-		pres = null;
+		nodes = (parentNode || document).getElementsByTagName('script');
+
+		for (i = 0; node = nodes[i]; i++) {
+			if (/^code(\/|$)/.test(node.type)) {
+
+				var pre = document.createElement('pre');
+				var language = node.type.substr(5);
+				var value = node.innerHTML.replace(/< (\/?)script/g, "<$1script").replace(/^[\r\n]+/, "").replace(/\s+$/, "");
+				var space = /^\s+/.exec(value);
+
+				if (space) {
+					space = space[0];
+					value = value.split(/[\r\n]/);
+					for (j = value.length - 1; j >= 0; j--) {
+						value[j] = value[j].replace(space, "");
+					}
+					value = value.join('\r\n');
+				}
+
+				pre.className = 'sh' + (language ? ' sh-' + (SH.langs[language] || language) : '');
+				pre.textContent = pre.innerText = value;
+				pre.innerHTML = pre.innerHTML.replace(/##([\s\S]*?)##/g, "<strong>$1</strong>").replace(/__([\s\S]*?)__/g, "<u>$1</u>");
+				node.parentNode.insertBefore(pre, node.nextSibling);
+				elements.push(pre);
+			}
+		}
+
+		nodes = null;
 
 		function doWork() {
 			if (elements.length) {
-				SH.one(elements.shift());
+				SH.one(elements.shift(), undefined, undefined, bindDblClick);
 				setTimeout(doWork, 50);
 			} else if (callback) {
 				callback();

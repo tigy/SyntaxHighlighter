@@ -1,125 +1,145 @@
 ﻿<!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<title>J+ Library</title>
-<script type="text/javascript">(function () {
-    var sourceBaseUrl = "../src/";
-    var sources = [
-      "core.js",
-      "dom.js",
-      "lang/common.js",
-      "lang/apollo.js",
-      "lang/clj.js",
-      "lang/coffee.js",
-      "lang/css.js",
-      "lang/go.js",
-      "lang/hs.js",
-      "lang/lisp.js",
-      "lang/lua.js",
-      "lang/ml.js",
-      "lang/n.js",
-      "lang/php.js",
-      "lang/proto.js",
-      "lang/scala.js",
-      "lang/sql.js",
-      "lang/tex.js",
-      "lang/vhdl.js",
-      "lang/wiki.js",
-      "lang/vb.js",
-      "lang/xq.js",
-      "lang/yaml.js",
-    ];
-    var styles = [
-      "themes/default.css"
-    ];
-    for (var i = 0; i < sources.length; ++i) {
-        document.write("<script src=\"" + sourceBaseUrl + sources[i] + "\"><\/script>");
-    }
-    for (var i = 0; i < styles.length; ++i) {
-        document.write("<link rel=\"stylesheet\" href=\"" + sourceBaseUrl + styles[i] + "\">");
-    }
-})();
-</script>
-        <style>
-            #source, #output {
-                float: left;
-                margin:   0 10px 0 0;
-            }
+<head>
+	<meta charset="UTF-8">
+	<title>J+ Library</title>
+	<script type="text/javascript">
+		var sourceBaseUrl = "../src/";
+		var sources = [
+		  "core.js",
+		  "dom.js",
+		  "lang/common.js",
+		  "lang/apollo.js",
+		  "lang/clj.js",
+		  "lang/coffee.js",
+		  "lang/css.js",
+		  "lang/go.js",
+		  "lang/hs.js",
+		  "lang/lisp.js",
+		  "lang/lua.js",
+		  "lang/ml.js",
+		  "lang/n.js",
+		  "lang/php.js",
+		  "lang/proto.js",
+		  "lang/scala.js",
+		  "lang/sql.js",
+		  "lang/tex.js",
+		  "lang/vhdl.js",
+		  "lang/wiki.js",
+		  "lang/vb.js",
+		  "lang/xq.js",
+		  "lang/yaml.js",
+		];
+		
+		for (var i = 0; i < sources.length; ++i) {
+			document.write("<script src=\"" + sourceBaseUrl + sources[i] + "\"><\/script>");
+		}
+		
+		document.write("<link id=\"link\" rel=\"stylesheet\" href=\"" + sourceBaseUrl + "themes/default.css" + "\">");
 
-            #source {
-                width: 600px;
-                height: 500px;
-            }
-        </style>
+		function changeTheme(){
+			document.getElementById('link').href = sourceBaseUrl + 'themes/' + document.getElementById('theme').value + '.css';
+		}
+		
+		function doParse() {
+			
+			var output = document.getElementById('output');
+			output.className = 'sh';
+			output.innerText = output.textContent = document.getElementById('source').value;
+			SyntaxHighligher.one(output, document.getElementById('lang').value, document.getElementById('linestyles').checked);
+		}
+		
+	</script>
 
-        <script>
-            function doParse() {
-                var output = document.getElementById('output');
-                output.className = 'sh';
-                output.innerText = output.textContent = document.getElementById('source').value;
-                SyntaxHighligher.one(output, document.getElementById('lang').value, document.getElementById('linestyles').checked);
-            }
-        </script>
-	</head>
-	<body>
-        
-        语言： <select id="lang">
-            <option value="">自动</option>
-            <option value="js">js</option>
-            <option value="css">css</option>
-            <option value="html">html</option>
-            <option value="cpp">C++</option>
-            <option value="cs">C#</option>
-            <option value="vb">VB</option>
-        </select>
-        
-        主题： <select id="theme">
-            <option value="default">默认(default)</option>
-        </select>
+	<style>
+		#source, #output {
+			float: left;
+			margin:   0 10px 0 0;
+		}
 
-        <input type="checkbox" id="linestyles"/>
-        <label for="linestyles">显示行号</label>
+		#source {
+			width: 600px;
+			height: 500px;
+		}
+	</style>
+</head>
+<body>
+	
+	语言： <select id="lang">
+		<option value="">自动识别</option>
+		<option value="js">js</option>
+		<option value="css">css</option>
+		<option value="html">html</option>
+		<option value="cpp">C++</option>
+		<option value="cs">C#</option>
+		<option value="apollo">apollo</option>
+		<option value="clj">clj</option>
+		<option value="coffee">coffee</option>
+		<option value="go">go</option>
+		<option value="hs">hs</option>
+		<option value="lisp">lisp</option>
+		<option value="lua">lua</option>
+		<option value="ml">ml</option>
+		<option value="n">n</option>
+		<option value="php">php</option>
+		<option value="proto">proto</option>
+		<option value="scala">scala</option>
+		<option value="sql">sql</option>
+		<option value="tex">tex</option>
+		<option value="vhdl">vhdl</option>
+		<option value="wiki">wiki</option>
+		<option value="vb">vb</option>
+		<option value="xq">xq</option>
+		<option value="yaml">yaml</option>
+	</select>
+	
+	主题： <select id="theme" onchange="changeTheme()" onmouseup="changeTheme()">
+		<option value="default">浅色(default)</option>
+		<option value="desert">深色(desert)</option>
+	</select>
 
-        <input type="button" value="语法高亮" onclick="doParse()" />
+	<input type="checkbox" id="linestyles"/>
+	<label for="linestyles">显示行号</label>
 
-        <hr />
+	<input type="button" value="语法高亮" onclick="doParse()" />
 
-        <textarea placeholder="输入源码..." id="source">function walk(node) {
-	switch (node.nodeType) {
-		case 1:
-			// Element
-			for (var child = node.firstChild; child; child = child.nextSibling) {
-				walk(child);
+	<hr />
+
+	<textarea placeholder="输入源码..." id="source">function walk(node) {
+switch (node.nodeType) {
+	case 1:
+		// Element
+		for (var child = node.firstChild; child; child = child.nextSibling) {
+			walk(child);
+		}
+		var nodeName = node.nodeName;
+		if ('BR' === nodeName || 'LI' === nodeName) {
+			chunks[k] = '\n';
+			spans[k << 1] = length++;
+			spans[(k++ << 1) | 1] = node;
+		}
+		break;
+	case 3:
+	case 4:
+		// Text
+		var text = node.nodeValue;
+		if (text.length) {
+			if (isPreformatted) {
+				text = text.replace(/\r\n?/g, '\n'); // Normalize newlines.
+			} else {
+				text = text.replace(/[ \t\r\n]+/g, ' ');
 			}
-			var nodeName = node.nodeName;
-			if ('BR' === nodeName || 'LI' === nodeName) {
-				chunks[k] = '\n';
-				spans[k << 1] = length++;
-				spans[(k++ << 1) | 1] = node;
-			}
-			break;
-		case 3:
-		case 4:
-			// Text
-			var text = node.nodeValue;
-			if (text.length) {
-				if (isPreformatted) {
-					text = text.replace(/\r\n?/g, '\n'); // Normalize newlines.
-				} else {
-					text = text.replace(/[ \t\r\n]+/g, ' ');
-				}
-				// TODO: handle tabs here?
-				chunks[k] = text;
-				spans[k << 1] = length;
-				length += text.length;
-				spans[(k++ << 1) | 1] = node;
-			}
-			break;
-	}
+			// TODO: handle tabs here?
+			chunks[k] = text;
+			spans[k << 1] = length;
+			length += text.length;
+			spans[(k++ << 1) | 1] = node;
+		}
+		break;
+}
 }</textarea>
 
-        <pre id="output"></pre>
+	<pre id="output"></pre>
 
-	</body>
+</body>
 </html>
