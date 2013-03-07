@@ -4,7 +4,6 @@
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
@@ -13,94 +12,155 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <title>Syntaxhighligherplus by jplusui</title>
+    <title>SyntaxHighlighterLite - 一个快速上手的代码高亮组件</title>
+	<script src="syntaxhighlighter.min.js"></script>
   </head>
 
   <body>
     <header>
       <div class="inner">
-        <h1>Syntaxhighligherplus</h1>
-        <h2>Javascript Syntax Highligher</h2>
-        <a href="https://github.com/jplusui/SyntaxHighligherPlus" class="button"><small>View project on</small>GitHub</a>
+        <h1>Syntaxhighligher<sup>Lite</sup></h1>
+        <h2>一个快速上手的代码高亮组件</h2>
+        <a href="https://github.com/jplusui/SyntaxHighligherPlus" class="button"><small>访问 </small>GitHub </a>
       </div>
     </header>
 
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h1>SyntaxHighligherPlus 概述</h1>
 
-<p>SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。</p>
+    <h2>特性</h2>
 
-<h1>特性</h1>
+	<ul>
+		<li>无需调用任何 API ，引 1 个 <a target="_blank" href="syntaxhighlighter.js">js 文件</a>即可高亮。</li>
+		<li>仅 8k (Gzip 压缩) 。</li>
+		<li>兼容主流浏览器（包括 IE6）。</li>
+		<li>异步高亮，不影响页面渲染。</li>
+	</ul>
 
-<ul>
-<li>支持大部分编程语言。（如Html，Javascript 等常见语言都内置）</li>
-<li>支持自定义行号、主题、语言。</li>
-<li>支持 Nodejs 等非浏览器坏境。</li>
-<li>支持自动识别语言。</li>
-</ul><h1>用法</h1>
+    <h2>快速上手</h2>
 
-<h2>1. 引入 SyntaxHighligherPlus</h2>
+    <h3>第一步：引用 js</h3>
 
-<p>引入 build 文件夹下的 syntaxhighlighter.css 和 syntaxhighlighter.js 。</p>
+    <script type="code/html">
+		< script src="http://jplusui.github.com/SyntaxHighligherPlus/syntaxhighlighter.min.js">< /script>
+    </script>
 
-<pre><code>&lt;link href="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.css" rel="stylesheet" type="text/css"&gt;
-&lt;script src="https://raw.github.com/xuld/SyntaxHighligherPlus/master/build/syntaxhighlighter.js" type="text/javascript"&gt;&lt;/script&gt;
-</code></pre>
+    <h3>第二步：在页面插入代码：</h3>
 
-<h2>2. 高亮标签</h2>
+    <script type="code/html">
+        < script type="code">
+            var code = "hello world";
+        < /script>
+    </script>
 
-<p>使用 SyntaxHighligher.all() 可以自动处理所以标记有sh的标签。</p>
+    <p>在 script type=code 中的代码就会高亮显示。</p>
 
-<pre><code>&lt;body onload="SyntaxHighligher.all();"&gt;
+    <h2>更多用法</h2>
 
-    &lt;pre class="sh"&gt;class Animal
-      constructor: (@name) -&gt;&lt;/pre&gt;
+    <h3>1. 指定代码语言</h3>
 
-&lt;/body&gt;
-</code></pre>
+    <h4>HTML/XML</h4>
 
-<h2>指定语言</h2>
+    <script type="code/html">
+        < script type="code/html">
+            <div id="body"></div>
+        < /script>
+    </script>
 
-<p>使用 sh-语言名 类名可强制使用特定语言的高亮。</p>
+    <h4>JavaScript</h4>
 
-<pre><code>&lt;body onload="SyntaxHighligher.all();"&gt;
+    <script type="code/html">
+        < script type="code/javascript">
+            var a = "333";
+        < /script>
+    </script>
 
-    &lt;pre class="sh-coffee"&gt;class Animal
-      constructor: (@name) -&gt;&lt;/pre&gt;
+    <h4>CSS</h4>
 
-&lt;/body&gt;
-</code></pre>
+    <script type="code/html">
+        < script type="code/css">
+            body {
+                background-image: url(aaa/png);
+            }
+        < /script>
+    </script>
 
-<h1>API</h1>
+    <h4>CoffeeScript</h4>
 
-<p>框架提供了一个 SyntaxHighligher 对象，通过该对象可以实现特定的高亮需求。具体可参考文档和源码。</p>
+    <script type="code/html">
+        < script type="code/coffee">
+            a = 4;
+        < /script>
+    </script>
 
-<p>常用的API有：</p>
+    <h4>PHP</h4>
 
-<ul>
-<li>SyntaxHighligher.all(): 高亮页面内全部 pre.sh 标签。</li>
-<li>SyntaxHighligher.one(pre, language, startLineNumber): 高亮页面内指定的 pre 标签。</li>
-<li>SyntaxHighligher.quickOne(pre): 仅高亮指定的 pre 标签, 不额外处理DOM标签。（如不支持双击复制代码）</li>
-<li>SyntaxHighligher.highlight(sourceCode): 输入代码片段，返回高亮后的 HTML 代码。</li>
-</ul>
+    <script type="code/html">
+        < script type="code/php">
+            <?php echo "a";
+                for($i = 0; $i < 2; $i++){
+                    $i = 3;
+                }
+             ?>
+        < /script>
+    </script>
+
+    <a href="https://github.com/jplusui/SyntaxHighligherPlus/tree/master/src/lang" target="_blank">更多语言支持请见源码</a>;或者您也可以自定义语法。
+    
+    <h3>2. 显示行号</h3>
+
+    <p>本精简版不支持显示行号。请使用<a href="https://github.com/jplusui/SyntaxHighligherPlus" target="_blank">完整版</a></p>
+
+    <h3>3. API</h3>
+
+    <p>默认 SyntaxHighlighter<sup>Lite</sup> 会自动高亮 script type=code。如果需要，可调用如下三个 API 来手动高亮：</p>
+
+    <script type="code/javascript">
+        SyntaxHighligher.one(pre, language) // 高亮页面内指定的 pre 标签。
+        SyntaxHighligher.highlight(sourceCode) // 输入源码，返回高亮后的 HTML 代码。
+    </script>
+
+    <h3>4. 自定义主题</h3>
+
+    <p>高亮的样式都是通过 css 指定的，覆盖相应的 css 类即可更改主题。<a href="https://github.com/jplusui/SyntaxHighligherPlus/blob/master/src/themes/default.css" target="_blank">示例文件</a></p>
+
+    <h2>下载和反馈</h2>
+
+    <p>
+        <a href="syntaxhighlighter.js" target="_blank">下载 SyntaxHighligher<sup>Lite</sup> 2.0 稳定版</a>
+    </p>
+
+    <p>
+        <a href="https://github.com/jplusui/SyntaxHighligherPlus" target="_blank">访问 SyntaxHighligher 项目主页</a>
+    </p>
+
+    <p>
+        <a href="https://github.com/jplusui/SyntaxHighligherPlus/issues" target="_blank">BUG 和意见反馈</a>
+    </p>
+		  
+		  
         </section>
 
         <aside id="sidebar">
-          <a href="https://github.com/jplusui/SyntaxHighligherPlus/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
+          <a href="syntaxhighlighter.min.js" class="button">
+            <small>下载</small>
+            2.0 压缩版
           </a>
-          <a href="https://github.com/jplusui/SyntaxHighligherPlus/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
+          <a href="syntaxhighlighter.js" class="button">
+            <small>下载</small>
+            2.0 未压缩版
           </a>
-
-          <p class="repo-owner"><a href="https://github.com/jplusui/SyntaxHighligherPlus"></a> is maintained by <a href="https://github.com/jplusui">jplusui</a>.</p>
+          <a href="https://github.com/jplusui/SyntaxHighligherPlus/archive/master.zip" class="button">
+            <small>下载</small>
+            全部源码
+          </a>
 
           <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
+			
+		  <p class="repo-owner">Copyright 2012-2013 &copy; xuld</p>
+			
+		</aside>
       </div>
     </div>
 
