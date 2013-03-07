@@ -13,7 +13,7 @@
     <![endif]-->
 
     <title>SyntaxHighlighterLite - 一个快速上手的代码高亮组件</title>
-	<script src="syntaxhighlighter.min.js"></script>
+	<script src="syntaxhighlighter.js"></script>
   </head>
 
   <body>
@@ -110,9 +110,13 @@
     
     <h3>2. 显示行号</h3>
 
-    <p>本精简版不支持显示行号。请使用<a href="https://github.com/jplusui/SyntaxHighligherPlus" target="_blank">完整版</a></p>
+    <p>本精简版不支持显示行号。请使用<a href="full.html" target="_blank">完整版</a></p>
 
-    <h3>3. API</h3>
+    <h3>3. 自定义样式</h3>
+
+    <p>高亮的样式都是通过 css 指定的，覆盖相应的 css 类即可更改主题。<a href="https://github.com/jplusui/SyntaxHighligherPlus/blob/master/src/themes/default.css" target="_blank">示例文件</a></p>
+
+    <h3>4. API</h3>
 
     <p>默认 SyntaxHighlighter<sup>Lite</sup> 会自动高亮 script type=code。如果需要，可调用如下三个 API 来手动高亮：</p>
 
@@ -120,11 +124,7 @@
         SyntaxHighligher.one(pre, language) // 高亮页面内指定的 pre 标签。
         SyntaxHighligher.highlight(sourceCode) // 输入源码，返回高亮后的 HTML 代码。
     </script>
-
-    <h3>4. 自定义主题</h3>
-
-    <p>高亮的样式都是通过 css 指定的，覆盖相应的 css 类即可更改主题。<a href="https://github.com/jplusui/SyntaxHighligherPlus/blob/master/src/themes/default.css" target="_blank">示例文件</a></p>
-
+	
     <h2>下载和反馈</h2>
 
     <p>

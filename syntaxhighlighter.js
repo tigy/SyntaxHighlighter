@@ -500,10 +500,7 @@ var SyntaxHighligher = (function () {
 	};
 
 	SH.langs = {
-		'javascript': 'js',
-		'python': 'py',
-		'ruby': 'rb',
-		'csharp': 'cs',
+		'javascript': 'js'
 	};
 
 	/**
@@ -526,7 +523,6 @@ var SyntaxHighligher = (function () {
 
 		for (i = 0; node = nodes[i]; i++) {
 			if (/^code(\/|$)/.test(node.type)) {
-
 				var pre = document.createElement('pre');
 				var language = node.type.substr(5);
 				var value = node.innerHTML.replace(/< (\/?)script/g, "<$1script").replace(/^[\r\n]+/, "").replace(/\s+$/, "");
