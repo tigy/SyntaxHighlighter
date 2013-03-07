@@ -41,6 +41,8 @@
 			document.getElementById('link').href = sourceBaseUrl + 'themes/' + document.getElementById('theme').value + '.css';
 		}
 		
+		window.onload =  doParse;
+		
 		function doParse() {
 			
 			var output = document.getElementById('output');

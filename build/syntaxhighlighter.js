@@ -1,17 +1,7 @@
-﻿// Copyright (C) 2012 xuld
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
+﻿
+/**
+ * 代码高亮模块。
+ */
 var SyntaxHighligher = (function () {
 	
 	/**
@@ -151,7 +141,7 @@ var SyntaxHighligher = (function () {
 				removeEmptyAndNestedDecorations(decorations);
 				return decorations;
 			};
-			
+
 			return decorate;
 		},
 
@@ -188,7 +178,7 @@ var SyntaxHighligher = (function () {
 				SH.brushes[language[i]] = stylePatterns;
 			}
 		}
-		
+
 	};
 
 	// CAVEAT: this does not properly handle the case where a regular
@@ -338,7 +328,7 @@ var SyntaxHighligher = (function () {
 		}
 		return ch;
 	}
-	
+
 	var escapeCharToCodeUnit = {
 		'b': 8,
 		't': 9,
@@ -470,91 +460,83 @@ var SyntaxHighligher = (function () {
 
 	}
 
-	return SH;
-	
-})();
-
-
-
-// Copyright (C) 2012 xuld
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-(function (SH) {
-
-	/**
-	 * 快速高亮单一的节点。
-	 * @param {Element} elem 要高亮的节点。
-	 * @param {String} [language] 语言本身。系统会自动根据源码猜测语言。
-	 * @param {Number} lineNumberStart=null 第一行的计数，如果是null，则不显示行号。
-	 */
-	SH.quickOne = function(elem, language, lineNumberStart) {
-		syntaxHighlight(elem, elem, language, lineNumberStart);
-	};
-	
 	/**
 	 * 高亮单一的节点。
 	 * @param {Element} elem 要高亮的节点。
 	 * @param {String} [language] 语言本身。系统会自动根据源码猜测语言。
-	 * @param {Number} lineNumberStart=null 第一行的计数，如果是null，则不显示行号。
 	 */
-	SH.one = function (elem, language, lineNumberStart) {
-	
-		var pre,
-			code;
+	SH.one = function (pre, language) {
 
-		// 确保是 <pre><code></code><pre> 结构。
-		if (elem.tagName === 'PRE') {
-		
-			pre = elem;
+		// Extract tags, and convert the source code to plain text.
+		var sourceAndSpans = extractSourceSpans(pre),
+			specificLanuage = (pre.className.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
 
-			// 找到 <code>
-			code = elem.lastChild;
-			while (code && code.nodeType !== 1)
-				code = code.previousSibling;
-
-			if (!code || code.tagName !== 'CODE') {
-				code = document.createElement('code');
-				while (elem.firstChild) {
-					code.appendChild(elem.firstChild);
-				}
-				code.className = 'sh-code';
-				elem.appendChild(code);
-			}
-		} else {
-			pre = code = elem;
+		// 自动决定 language 和 lineNumbers
+		if (!language) {
+			language = specificLanuage || SH.guessLanguage(sourceAndSpans.sourceCode);
 		}
-		
-		syntaxHighlight(code, pre, language, lineNumberStart);
 
-		code.ondblclick = handlerDblclick;
+		if (!specificLanuage) {
+			pre.className += ' sh-' + language;
+		}
+
+		// Apply the appropriate language handler
+		// Integrate the decorations and tags back into the source code,
+		// modifying the sourceNode in place.
+		recombineTagsAndDecorations(sourceAndSpans, SH.findBrush(language)(sourceAndSpans.sourceCode, 0));
 	};
-	
+
+	SH.langs = {
+		'javascript': 'js',
+		'python': 'py',
+		'ruby': 'rb',
+		'csharp': 'cs',
+	};
+
 	/**
 	 * 高亮页面上全部节点。
 	 * @remark 解析是针对全部 PRE.sh 节点的。
 	 */
 	SH.all = function (callback, parentNode) {
 		var elements = [],
-			pres = (parentNode || document).getElementsByTagName('pre'),
-			i = 0;
+			nodes = (parentNode || document).getElementsByTagName('pre'),
+			node,
+			i,
+			j;
 
-		for (; pres[i]; i++) {
-			if (/\bsh\b/.test(pres[i].className))
-				elements.push(pres[i]);
+		for (i = 0; node = nodes[i]; i++) {
+			if (/\bsh\b/.test(node.className))
+				elements.push(node);
 		}
 
-		pres = null;
+		nodes = (parentNode || document).getElementsByTagName('script');
+
+		for (i = 0; node = nodes[i]; i++) {
+			if (/^code(\/|$)/.test(node.type)) {
+
+				var pre = document.createElement('pre');
+				var language = node.type.substr(5);
+				var value = node.innerHTML.replace(/< (\/?)script/g, "<$1script").replace(/^[\r\n]+/, "").replace(/\s+$/, "");
+				var space = /^\s+/.exec(value);
+
+				if (space) {
+					space = space[0];
+					value = value.split(/[\r\n]/);
+					for (j = value.length - 1; j >= 0; j--) {
+						value[j] = value[j].replace(space, "");
+					}
+					value = value.join('\r\n');
+				}
+
+				pre.className = 'sh' + (language ? ' sh-' + (SH.langs[language] || language) : '');
+				pre.textContent = pre.innerText = value;
+				pre.innerHTML = pre.innerHTML.replace(/##([\s\S]*?)##/g, "<strong>$1</strong>").replace(/__([\s\S]*?)__/g, "<u>$1</u>");
+				node.parentNode.insertBefore(pre, node.nextSibling);
+				elements.push(pre);
+			}
+		}
+
+		nodes = null;
 
 		function doWork() {
 			if (elements.length) {
@@ -567,70 +549,38 @@ var SyntaxHighligher = (function () {
 
 		doWork();
 	};
-	
-	function syntaxHighlight(code, pre, language, lineNumberStart) {
-		
-		// Extract tags, and convert the source code to plain text.
-		var sourceAndSpans = extractSourceSpans(code),
-			replaceLine = pre.className.replace(/\bsh-line\b/, ""),
-			specificLanuage = (replaceLine.match(/\bsh-(\w+)(?!\S)/i) || [0, null])[1];
 
-		// 自动决定 language 和 lineNumbers
-		if (!language) {
-			language = specificLanuage || SH.guessLanguage(sourceAndSpans.sourceCode);
-		} 
-		
-		if(!specificLanuage) {
-			pre.className += ' sh-' + language;
+	SH.highlight = function (sourceCode, language, startPosition) {
+		var SH = SyntaxHighligher, brush = SH.findBrush(language || SH.guessLanguage(sourceCode));
+		if (brush) {
+			var decorations = brush(sourceCode, startPosition || 0),
+				r = "",
+				i = 0,
+				len = decorations.length;
+			decorations[len] = sourceCode.length;
+			for (; i < len; i += 2) {
+				r += '<span class="sh-' + decorations[i + 1] + '">' + sourceCode.substring(decorations[i], decorations[i + 2]) + '</span>';
+			}
+
+			return r;
 		}
 
-		// Apply the appropriate language handler
-		// Integrate the decorations and tags back into the source code,
-		// modifying the sourceNode in place.
-		recombineTagsAndDecorations(sourceAndSpans, SH.findBrush(language)(sourceAndSpans.sourceCode, 0));
+		return sourceCode;
+	};
 
-		if (lineNumberStart != undefined ? lineNumberStart !== false : replaceLine.length < pre.className.length) {
-			createLineNumbers(code, sourceAndSpans.sourceCode, +lineNumberStart);
-		}
-	}
-	
-	function createLineNumbers(elem, sourceCode, lineNumberStart) {
-		var space = document.constructor ? '' : '&nbsp;',
-			r = ['<li class="sh-linenumber0">' + space + '</li>'],
-			i = -1,
-			line = 1,
-			ol;
-		while ((i = sourceCode.indexOf('\n', i + 1)) >= 0) {
-			r.push('<li class="sh-linenumber' + (line++ % 10) + '">' + space + '</li>');
+	SH.init = function () {
+
+		var style = document.createElement('style');
+		style.innerHTML = '.sh{padding:3px 5px;border:1px solid #e1e1e8;display:block;margin:9px 0;white-space:pre;background-color:#f5f5f5;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;word-break:break-all;overflow:auto}.sh,.sh-code,.sh-textarea,.sh-linenumbers li{line-height:18px;font-size:12px;font-family:"Courier New",Menlo,Monaco,monospace}.sh-code,.sh-textarea{display:inline-block;padding:5px;margin:0;background-color:#f5f5f5}.sh-textarea{resize:none;overflow:hidden;border:0}.sh-linenumbers{float:left;margin:0;width:0;*width:auto;border-radius:3px 0 0 3px;-webkit-border-radius:3px 0 0 3px;-moz-border-radius:3px 0 0 3px;border-right:1px solid #ececf0;padding:5px 0 5px 50px;background-color:#fbfbfc}.sh-linenumbers li{list-style-type:decimal;color:#bebec5;text-shadow:0 1px 0 #fff}.sh-comment{color:#93a1a1}.sh-literal{color:#195f91}.sh-punctuation,.sh-leftbracket,.sh-rightbracket{color:#93a1a1}.sh-function{color:#dc322f}.sh-string,.sh-attrvalue{color:#D14}.sh-keyword,.sh-tag{color:#1e347b}.sh-type,.sh-attrname,.sh-declaration,.sh-var{color:teal}.sh-plain{color:#48484c}';
+
+		(document.getElementsByTagName('head')[0] || document.documentElement).appendChild(style);
+
+		function check() {
+			/in/.test(document.readyState) ? setTimeout(check, 1) : SH.all();
 		}
 
-		ol = document.createElement('ol');
-		ol.className = 'sh-linenumbers';
-		ol.innerHTML = r.join('');
-
-		if (!isNaN(lineNumberStart)) ol.start = lineNumberStart;
-		elem.parentNode.insertBefore(ol, elem);
-	}
-
-	function handlerDblclick() {
-		var elem = this,
-			textarea = document.createElement('textarea');
-
-		textarea.className = 'sh-textarea';
-		textarea.value = elem.textContent || elem.innerText;
-		textarea.readOnly = true;
-		textarea.style.width = elem.offsetWidth + 'px';
-		textarea.style.height = elem.offsetHeight - 12 + 'px';
-
-		textarea.onblur = function () {
-			textarea.parentNode.replaceChild(elem, textarea);
-		};
-		elem.parentNode.replaceChild(textarea, elem);
-
-		// preselect all text
-		textarea.focus();
-		textarea.select();
-	}
+		check();
+	};
 
 	/**
 	 * Split markup into a string of source code and an array mapping ranges in
@@ -655,7 +605,7 @@ var SyntaxHighligher = (function () {
 	 * <pre>
 	 * {
 	 *   sourceCode: "print 'Hello '\n  + 'World';",
-	 *   //                 1         2
+	 *   //              1         2
 	 *   //       012345678901234 5678901234567
 	 *   spans: [0, #1, 6, #2, 14, #3, 15, #4]
 	 * }
@@ -786,7 +736,7 @@ var SyntaxHighligher = (function () {
 				// space to appear at the beginning of every line but the first.
 				// Emitting an old Mac OS 9 line separator makes everything spiffy.
 				// if (isIE) {
-					// styledText = styledText.replace(newlineRe, '\r');
+				// styledText = styledText.replace(newlineRe, '\r');
 				// }
 				textNode.nodeValue = styledText;
 				var document = textNode.ownerDocument;
@@ -814,51 +764,6 @@ var SyntaxHighligher = (function () {
 			}
 		}
 	}
-
-})(SyntaxHighligher);
-
-
-
-
-// Copyright (C) 2012 xuld
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-
-SyntaxHighligher.highlight = function (sourceCode, language, startPosition) {
-	var SH = SyntaxHighligher, brush = SH.findBrush(language || SH.guessLanguage(sourceCode));
-	if (brush) {
-		var decorations = brush(sourceCode, startPosition || 0),
-			r = "",
-			i = 0,
-			len = decorations.length;
-		decorations[len] = sourceCode.length;
-		for (; i < len; i += 2) {
-			r += '<span class="sh-' + decorations[i + 1] + '">' + sourceCode.substring(decorations[i], decorations[i + 2]) + '</span>';
-		}
-
-		return r;
-	}
-
-	return sourceCode;
-};
-
-
-
-
-(function () {
-
-	var SH = SyntaxHighligher;
 
 	// Keyword lists for various languages.
 	// We use things that coerce to strings to make them compact when minified
@@ -1043,31 +948,26 @@ SyntaxHighligher.highlight = function (sourceCode, language, startPosition) {
 
 		shortcutStylePatterns.push(['plain', /^\s+/, ' \r\n\t\xA0']);
 		fallthroughStylePatterns.push(
-        // TODO(mikesamuel): recognize non-latin letters and numerals in idents
-        ['literal', /^@[a-z_$][a-z_$@0-9]*/i],
-        ['type', /^(?:[@_]?[A-Z]+[a-z][A-Za-z_$@0-9]*|\w+_t\b)/],
-        ['plain', /^[a-z_$][a-z_$@0-9]*/i],
-        ['literal', new RegExp(
-             '^(?:'
-             // A hex number
-             + '0x[a-f0-9]+'
-             // or an octal or decimal number,
-             + '|(?:\\d(?:_\\d+)*\\d*(?:\\.\\d*)?|\\.\\d\\+)'
-             // possibly in scientific notation
-             + '(?:e[+\\-]?\\d+)?'
-             + ')'
-             // with an optional modifier like UL for unsigned long
-             + '[a-z]*', 'i'), '0123456789'],
-        // Don't treat escaped quotes in bash as starting strings.  See issue 144.
-        ['plain', /^\\[\s\S]?/],
-        ['punctuation', /^.[^\s\w\.$@\'\"\`\/\#\\]*/]);
+		// TODO(mikesamuel): recognize non-latin letters and numerals in idents
+		['literal', /^@[a-z_$][a-z_$@0-9]*/i],
+		['type', /^(?:[@_]?[A-Z]+[a-z][A-Za-z_$@0-9]*|\w+_t\b)/],
+		['plain', /^[a-z_$][a-z_$@0-9]*/i],
+		['literal', new RegExp(
+			 '^(?:'
+			 // A hex number
+			 + '0x[a-f0-9]+'
+			 // or an octal or decimal number,
+			 + '|(?:\\d(?:_\\d+)*\\d*(?:\\.\\d*)?|\\.\\d\\+)'
+			 // possibly in scientific notation
+			 + '(?:e[+\\-]?\\d+)?'
+			 + ')'
+			 // with an optional modifier like UL for unsigned long
+			 + '[a-z]*', 'i'), '0123456789'],
+		// Don't treat escaped quotes in bash as starting strings.  See issue 144.
+		['plain', /^\\[\s\S]?/],
+		['punctuation', /^.[^\s\w\.$@\'\"\`\/\#\\]*/]);
 
 		return shortcutStylePatterns.concat(fallthroughStylePatterns);
-
-
-
-
-
 	}
 
 	register('default', simpleLexer({
@@ -1116,52 +1016,52 @@ SyntaxHighligher.highlight = function (sourceCode, language, startPosition) {
 		['css', /^<style\b[^>]*>([\s\S]*?)(<\/style\b[^>]*>)/i],
 		['in.tag', /^(<\/?[a-z][^<>]*>)/i]
 	]);
-	register('uq.val', [[ATTRIB_VALUE, /^[\s\S]+/]]);
-
-	register('c cc cpp cxx cyc m', simpleLexer({
-		'keywords': CPP_KEYWORDS,
-		'hashComments': true,
-		'cStyleComments': true,
-		'types': C_TYPES
-	}));
 
 	register('json', simpleLexer({
 		'keywords': 'null,true,false'
 	}));
 
-	register('cs', simpleLexer({
-		'keywords': CSHARP_KEYWORDS,
-		'hashComments': true,
+	register('in.php', simpleLexer({
+		'keywords': 'abstract and array as break case catch cfunction class clone const continue declare default die do ' +
+							'else elseif enddeclare endfor endforeach endif endswitch endwhile extends final for foreach ' +
+							'function include include_once global goto if implements interface instanceof namespace new ' +
+							'old_function or private protected public return require require_once static switch ' +
+							'throw try use var while xor',
 		'cStyleComments': true,
-		'verbatimStrings': true,
-		'types': C_TYPES
-	}));
-	register('java', simpleLexer({
-		'keywords': JAVA_KEYWORDS,
-		'cStyleComments': true
-	}));
-	register('bsh csh sh', simpleLexer({
-		'keywords': SH_KEYWORDS,
-		'hashComments': true,
-		'multiLineStrings': true
-	}));
-	register('cv py', simpleLexer({
-		'keywords': PYTHON_KEYWORDS,
-		'hashComments': true,
-		'multiLineStrings': true,
-		'tripleQuotedStrings': true
-	}));
-	register('perl pl pm', simpleLexer({
-		'keywords': PERL_KEYWORDS,
-		'hashComments': true,
-		'multiLineStrings': true,
-		'regexLiterals': true
-	}));
-	register('rb', simpleLexer({
-		'keywords': RUBY_KEYWORDS,
-		'hashComments': true,
-		'multiLineStrings': true,
+		hashComments: 2,
 		'regexLiterals': true
 	}));
 
+	register('sql', [
+		// Whitespace
+		['plain', /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
+		// A double or single quoted, possibly multi-line, string.
+		['string', /^(?:"(?:[^\"\\]|\\.)*"|'(?:[^\'\\]|\\.)*')/, '"\''],
+		// A comment is either a line comment that starts with two dashes, or
+		// two dashes preceding a long bracketed block.
+		['comment', /^(?:--[^\r\n]*|\/\*[\s\S]*?(?:\*\/|$))/],
+		['keyword', /^(?:ADD|ALL|ALTER|AND|ANY|AS|ASC|AUTHORIZATION|BACKUP|BEGIN|BETWEEN|BREAK|BROWSE|BULK|BY|CASCADE|CASE|CHECK|CHECKPOINT|CLOSE|CLUSTERED|COALESCE|COLLATE|COLUMN|COMMIT|COMPUTE|CONSTRAINT|CONTAINS|CONTAINSTABLE|CONTINUE|CONVERT|CREATE|CROSS|CURRENT|CURRENT_DATE|CURRENT_TIME|CURRENT_TIMESTAMP|CURRENT_USER|CURSOR|DATABASE|DBCC|DEALLOCATE|DECLARE|DEFAULT|DELETE|DENY|DESC|DISK|DISTINCT|DISTRIBUTED|DOUBLE|DROP|DUMMY|DUMP|ELSE|END|ERRLVL|ESCAPE|EXCEPT|EXEC|EXECUTE|EXISTS|EXIT|FETCH|FILE|FILLFACTOR|FOR|FOREIGN|FREETEXT|FREETEXTTABLE|FROM|FULL|FUNCTION|GOTO|GRANT|GROUP|HAVING|HOLDLOCK|IDENTITY|IDENTITYCOL|IDENTITY_INSERT|IF|IN|INDEX|INNER|INSERT|INTERSECT|INTO|IS|JOIN|KEY|KILL|LEFT|LIKE|LINENO|LOAD|MATCH|MERGE|NATIONAL|NOCHECK|NONCLUSTERED|NOT|NULL|NULLIF|OF|OFF|OFFSETS|ON|OPEN|OPENDATASOURCE|OPENQUERY|OPENROWSET|OPENXML|OPTION|OR|ORDER|OUTER|OVER|PERCENT|PLAN|PRECISION|PRIMARY|PRINT|PROC|PROCEDURE|PUBLIC|RAISERROR|READ|READTEXT|RECONFIGURE|REFERENCES|REPLICATION|RESTORE|RESTRICT|RETURN|REVOKE|RIGHT|ROLLBACK|ROWCOUNT|ROWGUIDCOL|RULE|SAVE|SCHEMA|SELECT|SESSION_USER|SET|SETUSER|SHUTDOWN|SOME|STATISTICS|JPlus_USER|TABLE|TEXTSIZE|THEN|TO|TOP|TRAN|TRANSACTION|TRIGGER|TRUNCATE|TSEQUAL|UNION|UNIQUE|UPDATE|UPDATETEXT|USE|USER|USING|VALUES|VARYING|VIEW|WAITFOR|WHEN|WHERE|WHILE|WITH|WRITETEXT)(?=[^\w-]|$)/i],
+		// A number is a hex integer literal, a decimal real literal, or in
+		// scientific notation.
+		['literal', /^[+-]?(?:0x[\da-f]+|(?:(?:\.\d+|\d+(?:\.\d*)?)(?:e[+\-]?\d+)?))/i],
+		// An identifier
+		['plain', /^[a-z_][\w-]*/i],
+		// A run of punctuation
+		['punctuation', /^[^\w\t\n\r \xA0\"\'][^\w\t\n\r \xA0+\-\"\']*/]
+	]);
+
+	register('coffee', simpleLexer({
+		'keywords': "all and by catch class else extends false finally " + "for if in is isnt loop new no not null of off on or return super then " + "true try unless until when while yes",
+		'hashComments': 3,
+		// ### style block comments
+		'cStyleComments': true,
+		'multilineStrings': true,
+		'tripleQuotedStrings': true,
+		'regexLiterals': true
+	}));
+
+
+	return SH;
 })();
+
+SyntaxHighligher.init();
