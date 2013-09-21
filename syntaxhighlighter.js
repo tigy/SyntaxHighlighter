@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2012 xuld
+﻿﻿// Copyright (C) 2012 xuld
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 
 /**
  * 代码高亮模块。
@@ -500,7 +501,10 @@ var SyntaxHighligher = (function () {
 	};
 
 	SH.langs = {
-		'javascript': 'js'
+		'javascript': 'js',
+		'python': 'py',
+		'ruby': 'rb',
+		'csharp': 'cs',
 	};
 
 	/**
@@ -523,6 +527,7 @@ var SyntaxHighligher = (function () {
 
 		for (i = 0; node = nodes[i]; i++) {
 			if (/^code(\/|$)/.test(node.type)) {
+
 				var pre = document.createElement('pre');
 				var language = node.type.substr(5);
 				var value = node.innerHTML.replace(/< (\/?)script/g, "<$1script").replace(/^[\r\n]+/, "").replace(/\s+$/, "");
@@ -580,6 +585,7 @@ var SyntaxHighligher = (function () {
 	SH.init = function () {
 
 		var style = document.createElement('style');
+		style.id = "syntaxHighligherStyle";
 		style.innerHTML = '.sh{padding:3px 5px;border:1px solid #e1e1e8;display:block;margin:9px 0;white-space:pre;background-color:#f5f5f5;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;word-break:break-all;overflow:auto}.sh,.sh-code,.sh-textarea,.sh-linenumbers li{line-height:18px;font-size:12px;font-family:"Courier New",Menlo,Monaco,monospace}.sh-code,.sh-textarea{display:inline-block;padding:5px;margin:0;background-color:#f5f5f5}.sh-textarea{resize:none;overflow:hidden;border:0}.sh-linenumbers{float:left;margin:0;width:0;*width:auto;border-radius:3px 0 0 3px;-webkit-border-radius:3px 0 0 3px;-moz-border-radius:3px 0 0 3px;border-right:1px solid #ececf0;padding:5px 0 5px 50px;background-color:#fbfbfc}.sh-linenumbers li{list-style-type:decimal;color:#bebec5;text-shadow:0 1px 0 #fff}.sh-comment{color:#93a1a1}.sh-literal{color:#195f91}.sh-punctuation,.sh-leftbracket,.sh-rightbracket{color:#93a1a1}.sh-function{color:#dc322f}.sh-string,.sh-attrvalue{color:#D14}.sh-keyword,.sh-tag{color:#1e347b}.sh-type,.sh-attrname,.sh-declaration,.sh-var{color:teal}.sh-plain{color:#48484c}';
 
 		(document.getElementsByTagName('head')[0] || document.documentElement).appendChild(style);
@@ -774,23 +780,6 @@ var SyntaxHighligher = (function () {
 		}
 	}
 
-	// Keyword lists for various languages.
-	// We use things that coerce to strings to make them compact when minified
-	// and to defeat aggressive optimizers that fold large string constants.
-	var FLOW_CONTROL_KEYWORDS = "break continue do else for if return while";
-	var C_KEYWORDS = FLOW_CONTROL_KEYWORDS + " auto case char const default double enum extern float goto int long register short signed sizeof " + "static struct switch typedef union unsigned void volatile";
-	var COMMON_KEYWORDS = [C_KEYWORDS, "catch class delete false import new operator private protected public this throw true try typeof"];
-	var CPP_KEYWORDS = [COMMON_KEYWORDS, "alignof align_union asm axiom bool concept concept_map const_cast constexpr decltype dynamic_cast explicit export friend inline late_check mutable namespace nullptr reinterpret_cast static_assert static_cast template typeid typename using virtual where"];
-	var JAVA_KEYWORDS = [COMMON_KEYWORDS, "abstract boolean byte extends final finally implements import instanceof null native package strictfp super synchronized throws transient"];
-	var CSHARP_KEYWORDS = [JAVA_KEYWORDS, "as base by checked decimal delegate descending dynamic event fixed foreach from group implicit in interface internal into is lock object out override orderby params partial readonly ref sbyte sealed stackalloc string select uint ulong unchecked unsafe ushort var"];
-	var JSCRIPT_KEYWORDS = [COMMON_KEYWORDS, "debugger eval export function get null set undefined var with Infinity NaN"];
-	var PERL_KEYWORDS = "caller delete die do dump elsif eval exit foreach for goto if import last local my next no our print package redo require sub undef unless until use wantarray while BEGIN END";
-	var PYTHON_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "and as assert class def del elif except exec finally from global import in is lambda nonlocal not or pass print raise try with yield False True None"];
-	var RUBY_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "alias and begin case class def defined elsif end ensure false in module next nil not or redo rescue retry self super then true undef unless until when yield BEGIN END"];
-	var SH_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "case done elif esac eval fi function in local set then until"];
-	var ALL_KEYWORDS = [CPP_KEYWORDS, CSHARP_KEYWORDS, JSCRIPT_KEYWORDS, PERL_KEYWORDS + PYTHON_KEYWORDS, RUBY_KEYWORDS, SH_KEYWORDS];
-	var C_TYPES = /^(DIR|FILE|vector|(de|priority_)?queue|list|stack|(const_)?iterator|(multi)?(set|map)|bitset|u?(int|float)\d*)/;
-
 	/**
 	 * A set of tokens that can precede a regular expression literal in
 	 * javascript
@@ -977,7 +966,24 @@ var SyntaxHighligher = (function () {
 		['punctuation', /^.[^\s\w\.$@\'\"\`\/\#\\]*/]);
 
 		return shortcutStylePatterns.concat(fallthroughStylePatterns);
-	}
+	};
+
+	// Keyword lists for various languages.
+	// We use things that coerce to strings to make them compact when minified
+	// and to defeat aggressive optimizers that fold large string constants.
+	var FLOW_CONTROL_KEYWORDS = "break continue do else for if return while";
+	var C_KEYWORDS = FLOW_CONTROL_KEYWORDS + " auto case char const default double enum extern float goto int long register short signed sizeof " + "static struct switch typedef union unsigned void volatile";
+	var COMMON_KEYWORDS = [C_KEYWORDS, "catch class delete false import new operator private protected public this throw true try typeof"];
+	var CPP_KEYWORDS = [COMMON_KEYWORDS, "alignof align_union asm axiom bool concept concept_map const_cast constexpr decltype dynamic_cast explicit export friend inline late_check mutable namespace nullptr reinterpret_cast static_assert static_cast template typeid typename using virtual where"];
+	var JAVA_KEYWORDS = [COMMON_KEYWORDS, "abstract boolean byte extends final finally implements import instanceof null native package strictfp super synchronized throws transient"];
+	var CSHARP_KEYWORDS = [JAVA_KEYWORDS, "as base by checked decimal delegate descending dynamic event fixed foreach from group implicit in interface internal into is lock object out override orderby params partial readonly ref sbyte sealed stackalloc string select uint ulong unchecked unsafe ushort var"];
+	var JSCRIPT_KEYWORDS = [COMMON_KEYWORDS, "debugger eval export function get null set undefined var with Infinity NaN"];
+	var PERL_KEYWORDS = "caller delete die do dump elsif eval exit foreach for goto if import last local my next no our print package redo require sub undef unless until use wantarray while BEGIN END";
+	var PYTHON_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "and as assert class def del elif except exec finally from global import in is lambda nonlocal not or pass print raise try with yield False True None"];
+	var RUBY_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "alias and begin case class def defined elsif end ensure false in module next nil not or redo rescue retry self super then true undef unless until when yield BEGIN END"];
+	var SH_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "case done elif esac eval fi function in local set then until"];
+	var ALL_KEYWORDS = [CPP_KEYWORDS, CSHARP_KEYWORDS, JSCRIPT_KEYWORDS, PERL_KEYWORDS + PYTHON_KEYWORDS, RUBY_KEYWORDS, SH_KEYWORDS];
+	var C_TYPES = /^(DIR|FILE|vector|(de|priority_)?queue|list|stack|(const_)?iterator|(multi)?(set|map)|bitset|u?(int|float)\d*)/;
 
 	register('default', simpleLexer({
 		'keywords': ALL_KEYWORDS,
@@ -1025,50 +1031,71 @@ var SyntaxHighligher = (function () {
 		['css', /^<style\b[^>]*>([\s\S]*?)(<\/style\b[^>]*>)/i],
 		['in.tag', /^(<\/?[a-z][^<>]*>)/i]
 	]);
+	register('uq.val', [[ATTRIB_VALUE, /^[\s\S]+/]]);
+
+	register('c cc cpp cxx cyc m c++', simpleLexer({
+		'keywords': CPP_KEYWORDS,
+		'hashComments': true,
+		'cStyleComments': true,
+		'types': C_TYPES
+	}));
 
 	register('json', simpleLexer({
 		'keywords': 'null,true,false'
 	}));
 
-	register('in.php', simpleLexer({
-		'keywords': 'abstract and array as break case catch cfunction class clone const continue declare default die do ' +
-							'else elseif enddeclare endfor endforeach endif endswitch endwhile extends final for foreach ' +
-							'function include include_once global goto if implements interface instanceof namespace new ' +
-							'old_function or private protected public return require require_once static switch ' +
-							'throw try use var while xor',
+	register('cs c# csharp', simpleLexer({
+		'keywords': CSHARP_KEYWORDS,
+		'hashComments': true,
 		'cStyleComments': true,
-		hashComments: 2,
+		'verbatimStrings': true,
+		'types': C_TYPES
+	}));
+	register('java', simpleLexer({
+		'keywords': JAVA_KEYWORDS,
+		'cStyleComments': true
+	}));
+	register('bsh csh sh shell', simpleLexer({
+		'keywords': SH_KEYWORDS,
+		'hashComments': true,
+		'multiLineStrings': true
+	}));
+	register('cv py python', simpleLexer({
+		'keywords': PYTHON_KEYWORDS,
+		'hashComments': true,
+		'multiLineStrings': true,
+		'tripleQuotedStrings': true
+	}));
+	register('perl pl pm', simpleLexer({
+		'keywords': PERL_KEYWORDS,
+		'hashComments': true,
+		'multiLineStrings': true,
+		'regexLiterals': true
+	}));
+	register('rb ruby', simpleLexer({
+		'keywords': RUBY_KEYWORDS,
+		'hashComments': true,
+		'multiLineStrings': true,
 		'regexLiterals': true
 	}));
 
 	register('sql', [
-		// Whitespace
-		['plain', /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
-		// A double or single quoted, possibly multi-line, string.
-		['string', /^(?:"(?:[^\"\\]|\\.)*"|'(?:[^\'\\]|\\.)*')/, '"\''],
-		// A comment is either a line comment that starts with two dashes, or
-		// two dashes preceding a long bracketed block.
-		['comment', /^(?:--[^\r\n]*|\/\*[\s\S]*?(?:\*\/|$))/],
-		['keyword', /^(?:ADD|ALL|ALTER|AND|ANY|AS|ASC|AUTHORIZATION|BACKUP|BEGIN|BETWEEN|BREAK|BROWSE|BULK|BY|CASCADE|CASE|CHECK|CHECKPOINT|CLOSE|CLUSTERED|COALESCE|COLLATE|COLUMN|COMMIT|COMPUTE|CONSTRAINT|CONTAINS|CONTAINSTABLE|CONTINUE|CONVERT|CREATE|CROSS|CURRENT|CURRENT_DATE|CURRENT_TIME|CURRENT_TIMESTAMP|CURRENT_USER|CURSOR|DATABASE|DBCC|DEALLOCATE|DECLARE|DEFAULT|DELETE|DENY|DESC|DISK|DISTINCT|DISTRIBUTED|DOUBLE|DROP|DUMMY|DUMP|ELSE|END|ERRLVL|ESCAPE|EXCEPT|EXEC|EXECUTE|EXISTS|EXIT|FETCH|FILE|FILLFACTOR|FOR|FOREIGN|FREETEXT|FREETEXTTABLE|FROM|FULL|FUNCTION|GOTO|GRANT|GROUP|HAVING|HOLDLOCK|IDENTITY|IDENTITYCOL|IDENTITY_INSERT|IF|IN|INDEX|INNER|INSERT|INTERSECT|INTO|IS|JOIN|KEY|KILL|LEFT|LIKE|LINENO|LOAD|MATCH|MERGE|NATIONAL|NOCHECK|NONCLUSTERED|NOT|NULL|NULLIF|OF|OFF|OFFSETS|ON|OPEN|OPENDATASOURCE|OPENQUERY|OPENROWSET|OPENXML|OPTION|OR|ORDER|OUTER|OVER|PERCENT|PLAN|PRECISION|PRIMARY|PRINT|PROC|PROCEDURE|PUBLIC|RAISERROR|READ|READTEXT|RECONFIGURE|REFERENCES|REPLICATION|RESTORE|RESTRICT|RETURN|REVOKE|RIGHT|ROLLBACK|ROWCOUNT|ROWGUIDCOL|RULE|SAVE|SCHEMA|SELECT|SESSION_USER|SET|SETUSER|SHUTDOWN|SOME|STATISTICS|JPlus_USER|TABLE|TEXTSIZE|THEN|TO|TOP|TRAN|TRANSACTION|TRIGGER|TRUNCATE|TSEQUAL|UNION|UNIQUE|UPDATE|UPDATETEXT|USE|USER|USING|VALUES|VARYING|VIEW|WAITFOR|WHEN|WHERE|WHILE|WITH|WRITETEXT)(?=[^\w-]|$)/i],
-		// A number is a hex integer literal, a decimal real literal, or in
-		// scientific notation.
-		['literal', /^[+-]?(?:0x[\da-f]+|(?:(?:\.\d+|\d+(?:\.\d*)?)(?:e[+\-]?\d+)?))/i],
-		// An identifier
-		['plain', /^[a-z_][\w-]*/i],
-		// A run of punctuation
-		['punctuation', /^[^\w\t\n\r \xA0\"\'][^\w\t\n\r \xA0+\-\"\']*/]
-	]);
-
-	register('coffee', simpleLexer({
-		'keywords': "all and by catch class else extends false finally " + "for if in is isnt loop new no not null of off on or return super then " + "true try unless until when while yes",
-		'hashComments': 3,
-		// ### style block comments
-		'cStyleComments': true,
-		'multilineStrings': true,
-		'tripleQuotedStrings': true,
-		'regexLiterals': true
-	}));
-
+// Whitespace
+['plain', /^[\t\n\r \xA0]+/, '\t\n\r \xA0'],
+// A double or single quoted, possibly multi-line, string.
+['string', /^(?:"(?:[^\"\\]|\\.)*"|'(?:[^\'\\]|\\.)*')/, '"\''],
+// A comment is either a line comment that starts with two dashes, or
+// two dashes preceding a long bracketed block.
+['comment', /^(?:--[^\r\n]*|\/\*[\s\S]*?(?:\*\/|$))/],
+['keyword', /^(?:ADD|ALL|ALTER|AND|ANY|AS|ASC|AUTHORIZATION|BACKUP|BEGIN|BETWEEN|BREAK|BROWSE|BULK|BY|CASCADE|CASE|CHECK|CHECKPOINT|CLOSE|CLUSTERED|COALESCE|COLLATE|COLUMN|COMMIT|COMPUTE|CONSTRAINT|CONTAINS|CONTAINSTABLE|CONTINUE|CONVERT|CREATE|CROSS|CURRENT|CURRENT_DATE|CURRENT_TIME|CURRENT_TIMESTAMP|CURRENT_USER|CURSOR|DATABASE|DBCC|DEALLOCATE|DECLARE|DEFAULT|DELETE|DENY|DESC|DISK|DISTINCT|DISTRIBUTED|DOUBLE|DROP|DUMMY|DUMP|ELSE|END|ERRLVL|ESCAPE|EXCEPT|EXEC|EXECUTE|EXISTS|EXIT|FETCH|FILE|FILLFACTOR|FOR|FOREIGN|FREETEXT|FREETEXTTABLE|FROM|FULL|FUNCTION|GOTO|GRANT|GROUP|HAVING|HOLDLOCK|IDENTITY|IDENTITYCOL|IDENTITY_INSERT|IF|IN|INDEX|INNER|INSERT|INTERSECT|INTO|IS|JOIN|KEY|KILL|LEFT|LIKE|LINENO|LOAD|MATCH|MERGE|NATIONAL|NOCHECK|NONCLUSTERED|NOT|NULL|NULLIF|OF|OFF|OFFSETS|ON|OPEN|OPENDATASOURCE|OPENQUERY|OPENROWSET|OPENXML|OPTION|OR|ORDER|OUTER|OVER|PERCENT|PLAN|PRECISION|PRIMARY|PRINT|PROC|PROCEDURE|PUBLIC|RAISERROR|READ|READTEXT|RECONFIGURE|REFERENCES|REPLICATION|RESTORE|RESTRICT|RETURN|REVOKE|RIGHT|ROLLBACK|ROWCOUNT|ROWGUIDCOL|RULE|SAVE|SCHEMA|SELECT|SESSION_USER|SET|SETUSER|SHUTDOWN|SOME|STATISTICS|JPlus_USER|TABLE|TEXTSIZE|THEN|TO|TOP|TRAN|TRANSACTION|TRIGGER|TRUNCATE|TSEQUAL|UNION|UNIQUE|UPDATE|UPDATETEXT|USE|USER|USING|VALUES|VARYING|VIEW|WAITFOR|WHEN|WHERE|WHILE|WITH|WRITETEXT)(?=[^\w-]|$)/i],
+// A number is a hex integer literal, a decimal real literal, or in
+// scientific notation.
+['literal', /^[+-]?(?:0x[\da-f]+|(?:(?:\.\d+|\d+(?:\.\d*)?)(?:e[+\-]?\d+)?))/i],
+// An identifier
+['plain', /^[a-z_][\w-]*/i],
+// A run of punctuation
+['punctuation', /^[^\w\t\n\r \xA0\"\'][^\w\t\n\r \xA0+\-\"\']*/]
+]);
 
 	return SH;
 })();
