@@ -952,7 +952,7 @@ var SyntaxHighligher = (function () {
 		['punctuation', /^.[^\s\w\.$@\'\"\`\/\#\\]*/]);
 
 		return shortcutStylePatterns.concat(fallthroughStylePatterns);
-	}
+	};
 
 	// Keyword lists for various languages.
 	// We use things that coerce to strings to make them compact when minified
