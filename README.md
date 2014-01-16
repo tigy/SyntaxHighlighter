@@ -1,5 +1,7 @@
 # SyntaxHighligherPlus 概述
 
+在线文档：[http://jplusui.github.io/SyntaxHighlighter/](http://jplusui.github.io/SyntaxHighlighter/)
+
 SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。
 
 # 特性
@@ -11,18 +13,18 @@ SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。
 
 # 用法
 
-## 1. 引入 SyntaxHighligherPlus
+## 1. 引入 SyntaxHighlighter
 
 引入 build 文件夹下的 syntaxhighlighter.css 和 syntaxhighlighter.js 。
 
-	<link href="https://raw.github.com/jplusui/SyntaxHighligherPlus/master/build/syntaxhighlighter.css" rel="stylesheet" type="text/css">
-	<script src="https://raw.github.com/jplusui/SyntaxHighligherPlus/master/build/syntaxhighlighter.js" type="text/javascript"></script>
+	<link href="https://raw.github.com/jplusui/SyntaxHighlighter/master/build/syntaxhighlighter.css" rel="stylesheet" type="text/css">
+	<script src="https://raw.github.com/jplusui/SyntaxHighlighter/master/build/syntaxhighlighter.js" type="text/javascript"></script>
 
 ## 2. 高亮标签
 
 使用 <script>SyntaxHighligher.all()</script> 可以自动处理所以标记有sh的标签。
 
-	<body onload="SyntaxHighligher.all();">
+	<body onload="SyntaxHighlighter.all();">
 		
 		<pre class="sh">class Animal
 		  constructor: (@name) -></pre>
@@ -33,7 +35,7 @@ SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。
 
 使用 sh-语言名 类名可强制使用特定语言的高亮。
 
-	<body onload="SyntaxHighligher.all();">
+	<body onload="SyntaxHighlighter.all();">
 		
 		<pre class="sh-coffee">class Animal
 		  constructor: (@name) -></pre>
