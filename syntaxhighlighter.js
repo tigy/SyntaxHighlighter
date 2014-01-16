@@ -16,10 +16,10 @@
 /**
  * 代码高亮模块。
  */
-var SyntaxHighligher = (function () {
+var SyntaxHighlighter = (function () {
 	
 	/**
-	 * @namespace SyntaxHighligher
+	 * @namespace SyntaxHighlighter
 	 */
 	var SH = {
 
@@ -182,7 +182,7 @@ var SyntaxHighligher = (function () {
 		/**
 		 * 注册一个语言的刷子。
 		 * @param {String} language 要注册的语言名。
-		 * @param {Array} stylePatterns 匹配的正则列表。见 {@link SyntaxHighligher.createBrush}
+		 * @param {Array} stylePatterns 匹配的正则列表。见 {@link SyntaxHighlighter.createBrush}
 		 * @return {Function} 返回一个刷子，用于高亮指定的源码。
 		 */
 		register: function (language, stylePatterns) {
@@ -565,7 +565,7 @@ var SyntaxHighligher = (function () {
 	};
 
 	SH.highlight = function (sourceCode, language, startPosition) {
-		var SH = SyntaxHighligher, brush = SH.findBrush(language || SH.guessLanguage(sourceCode));
+		var SH = SyntaxHighlighter, brush = SH.findBrush(language || SH.guessLanguage(sourceCode));
 		if (brush) {
 			var decorations = brush(sourceCode, startPosition || 0),
 				r = "",
@@ -1100,4 +1100,4 @@ var SyntaxHighligher = (function () {
 	return SH;
 })();
 
-SyntaxHighligher.init();
+SyntaxHighlighter.init();
