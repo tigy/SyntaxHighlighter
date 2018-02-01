@@ -1,6 +1,6 @@
 # SyntaxHighligherPlus 概述
 
-在线文档：[http://jplusui.github.io/SyntaxHighlighter/](http://jplusui.github.io/SyntaxHighlighter/)
+在线文档：[http://tigy.github.io/SyntaxHighlighter/](http://tigy.github.io/SyntaxHighlighter/)
 
 SyntaxHighligherPlus 是一个 JavaScript 的语法高亮框架。
 
